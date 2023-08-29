@@ -6,8 +6,9 @@
 #include <avr/interrupt.h>
 #include <math.h>
 #include <string.h>
-
-
+#include <SD_RES_OUTPUT.h>
+#define CS_DE PORTA|=(1<<0);
+#define CS_EN PORTA&=~(1<<0);
 
 void SD_powerUpSeq()
 {
@@ -16,8 +17,9 @@ void SD_powerUpSeq()
 	// give SD card time to power up
 	_delay_ms(1);
 	// send 80 clock cycles to synchronize
-	for(uint8_t i = 0; i < 10; i++)
-	SPI_Write(0xFF);
+	for(uint8_t i = 0; i < 10; i++){
+		CS_EN;
+	SPI_Write(0xFF);}
 	// deselect SD card
 	CS_DE;
 	SPI_Write(0xFF);
@@ -198,42 +200,82 @@ USART_Send("Sending ACMD41: \r\n");
 res[0]=SD_sendOpCond();
 USART_Send("Response: \r\n");
 SD_printR1(res[0]);
- USART_Send("Sending CMD58: \r\n");
- SD_readOCR(res);
- USART_Send("Response: \r\n");
- SD_printR3(res);
- _delay_ms(1000);
+
+ _delay_ms(100);
 }
- while(1);
- /*while(res[0]!=0x0);*/
+ while(res[0]!=0x0);
+  USART_Send("Sending CMD58: \r\n");
+  SD_readOCR(res);
+  USART_Send("Response: \r\n");
+  SD_printR3(res);
 }
 
-
-uint8_t SD_init(){
-	SD_powerUpSeq();
-	uint8_t res[5];
-	res[0] = SD_goIdleState();
-	SD_sendIfCond(res);
-	SD_readOCR(res);
-	uint16_t CardAttemts =0;
-	do
-	{
-		res[0]=SD_sendApp();
-		res[0]=SD_sendOpCond();
-		_delay_ms(500);
-		CardAttemts++;
-	}
-	while(res[0]!=0x0 && CardAttemts<10);
-	if(CardAttemts>9) 
-	 return 1;
-	else 
-	 return 0;
-}
 
 // #define SD_SUCCESS  0
 // #define SD_ERROR    1
-uint8_t SD_Init_TEST()
+
+uint8_t SD_Init(){
+uint8_t res[5], cmdAttempts = 0;
+
+SD_powerUpSeq();
+
+// command card to idle
+while((res[0] = SD_goIdleState()) != 0x01)
 {
+	cmdAttempts++;
+	
+	if(cmdAttempts > 10) 
+		return 0;
+}
+
+// send interface conditions
+SD_sendIfCond(res);
+
+if(res[0] != 0x01){
+	return 1;
+}
+
+// check echo pattern
+if(res[4] != 0xAA){
+	return 2;
+}
+
+// attempt to initialize card
+cmdAttempts = 0;
+do
+{
+if(cmdAttempts > 100) return 3;
+
+// send app cmd
+res[0] = SD_sendApp();
+
+// if no error in response
+if(res[0] < 2)
+{
+res[0] = SD_sendOpCond();
+}
+
+// wait
+_delay_ms(10);
+
+cmdAttempts++;
+}
+while(res[0] != SD_READY);
+
+// read OCR
+SD_readOCR(res);
+
+// check card is ready
+if(!(res[1] & 0x80)) return 4;
+
+return 5;
+}
+
+
+
+
+
+uint8_t SD_Init_TEST(){
 	uint8_t res[5], cmdAttempts = 0;
 
 	SD_powerUpSeq();
@@ -242,19 +284,20 @@ uint8_t SD_Init_TEST()
 	while((res[0] = SD_goIdleState()) != 0x01)
 	{
 		cmdAttempts++;
-		if(cmdAttempts > 10) return 0;
+		
+		if(cmdAttempts > 10)
+		return 0;
 	}
 
 	// send interface conditions
 	SD_sendIfCond(res);
-	if(res[0] != 0x01)
-	{
+
+	if(res[0] != 0x01){
 		return 1;
 	}
 
 	// check echo pattern
-	if(res[4] != 0xAA)
-	{
+	if(res[4] != 0xAA){
 		return 2;
 	}
 
@@ -288,6 +331,21 @@ uint8_t SD_Init_TEST()
 
 	return 5;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 uint8_t token;	

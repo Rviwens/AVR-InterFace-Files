@@ -7,8 +7,7 @@
 #include <math.h>
 #include <string.h>
 
-#define CS_EN PORTA|=(1<<0);
-#define CS_DE PORTA&=~(1<<0);
+
 
 
 // void SPI_init()
@@ -46,7 +45,7 @@ break;
 
 }
 
-uint8_t SPI_Write(char data)		/* SPI write data function */
+char SPI_Write(char data)		/* SPI write data function */
 {
 	//PORTB&=~(1<<SS);
 	_delay_ms(1);
@@ -116,7 +115,7 @@ count++;
 }
 
 void SPI_USART_MREAD(){
-	char temp[100];
+	char temp[100]; 
 	USART_Send("\r\n Receiving Echo: ");
 	 SPI_Read(temp);
 	// USART_Send(temp);

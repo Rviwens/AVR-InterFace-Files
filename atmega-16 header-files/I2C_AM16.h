@@ -141,8 +141,8 @@ char I2C_Read_Ack()											/* I2C read ack function */
 char I2C_Read_Nack()										/* I2C read nack function */
 {
 	TWCR=(1<<TWEN)|(1<<TWINT);								/* Enable TWI and clear interrupt flag */
-	while (!(TWCR & (1<<TWINT)));							/* Wait until TWI finish its current job (read operation) */
-	return TWDR;											/* Return received data */
+	while (!(TWCR & (1<<TWINT)));							/* Wait until TWI finish its current job (read operation)*/
+	return TWDR;		/* Return received data */
 }
 
 
@@ -279,6 +279,20 @@ while (str[count]!='|');
 str[count]=0;
 I2C_Stop();	
 }
+
+void I2C_ReadWNES(int address, char *str, uint8_t NumOfBytes){
+	I2C_SRS(address);
+	int count =0;
+	do {
+		
+		str[count]= I2C_Read_Ack();
+		count++;
+	}
+	while (count<=NumOfBytes);
+    I2C_Read_Nack();
+	I2C_Stop();
+}
+
 
 void I2C_Str(char*string,int Address){
 USART_Int_Str(I2C_Start(Address),0);
