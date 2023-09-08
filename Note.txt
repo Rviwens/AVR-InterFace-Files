@@ -1,0 +1,8 @@
+http://www.rjhcoding.com/avrc-sd-interface-4.php 
+SD tutorial 
+
+-Fix Timers
+-Fix Libs
+-Optimize libs
+-set up 512 byte buff
+-SDCard
