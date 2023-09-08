@@ -6,7 +6,7 @@
 #include <avr/interrupt.h>
 #include <math.h>
 
-
+#define F_CPU 20000000UL
 #define Rising  11
 #define Falling 12
 #define TOG 13
@@ -16,25 +16,8 @@
 //#define F_CPU 20000000UL// Define CPU frequency here 20MHZ
 #define Timer
 
-int Func(int in){return in;}
-void Timer0(int Mode, int Prescaler, int Out);
-void Timer0_Compare(int Ticks);
 
-void Timer2(int Mode, int Prescaler, int Out);
-void Timer2_Compare(int Ticks);
 
-void Timer1( int Prescaler,int Register, int Out, int wgm13, int wgm12, int wgm11, int wgm10);
-void Timer1_Compare(int timer_ticks,int prescaler, int Vaule,int compare);
-
-void PWM0(double Vin, double VOUT,short CurrentD,short INPUT,short reg);
-void PWM1(double Vin, double VOUT, int CurrentD,int Register,int INPUT, short bitsize);
-void PWM2(double Vin, double VOUT, int CurrentD,int INPUT);
-
-void  Input_capInit(int Clk);
-
-void ADC_Init(void);
-void ADC_Read(char channel);
-void AnalogCOMP(int Out, int INPUTcapt, int Mode, int IE);
 
 // 	Atmega 16 Timer Registers
 // TCCR0(|FOC0|WGM00|COM01|COM00|WGM01|CS02|CS01|CS00|)
@@ -112,6 +95,8 @@ void Timer2(int Mode, int Prescaler, int Out){
 		case Rising:TCCR2|=(1<<CS22)|(1<<CS21)|(1<<CS20);break;
 	}
 }
+
+void Timer2_Compare(int Ticks){OCR2=Ticks;}
 
 void Timer1( int Prescaler,int Register, int Out, int wgm13, int wgm12, int wgm11, int wgm10){
 	TCCR1A |=(wgm10<<WGM10)|(wgm11<<WGM11);
@@ -226,7 +211,7 @@ void  Input_capInit(int Clk){
 
 
 
-void Timer2_Compare(int Ticks){OCR2=Ticks;}
+
 
 void ADC_Init(void){
 	SFIOR &=~(1<<ACME);

@@ -260,7 +260,7 @@ _delay_ms(10);
 
 cmdAttempts++;
 }
-while(res[0] != SD_READY);
+while(res[0] != 0x0);
 
 // read OCR
 SD_readOCR(res);
@@ -275,81 +275,8 @@ return 5;
 
 
 
-uint8_t SD_Init_TEST(){
-	uint8_t res[5], cmdAttempts = 0;
-
-	SD_powerUpSeq();
-
-	// command card to idle
-	while((res[0] = SD_goIdleState()) != 0x01)
-	{
-		cmdAttempts++;
-		
-		if(cmdAttempts > 10)
-		return 0;
-	}
-
-	// send interface conditions
-	SD_sendIfCond(res);
-
-	if(res[0] != 0x01){
-		return 1;
-	}
-
-	// check echo pattern
-	if(res[4] != 0xAA){
-		return 2;
-	}
-
-	// attempt to initialize card
-	cmdAttempts = 0;
-	do
-	{
-		if(cmdAttempts > 100) return 3;
-
-		// send app cmd
-		res[0] = SD_sendApp();
-
-		// if no error in response
-		if(res[0] < 2)
-		{
-			res[0] = SD_sendOpCond();
-		}
-
-		// wait
-		_delay_ms(10);
-
-		cmdAttempts++;
-	}
-	while(res[0] != SD_READY);
-
-	// read OCR
-	SD_readOCR(res);
-
-	// check card is ready
-	if(!(res[1] & 0x80)) return 4;
-
-	return 5;
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 uint8_t token;	
-uint8_t SD_RSB(uint32_t addr, uint8_t *buf, uint8_t *token)
+uint8_t SD_RSB(uint32_t addr, uint8_t *buf[], uint8_t *token)
 {
 	uint8_t res1, read;
 	uint16_t readAttempts;
@@ -363,22 +290,24 @@ uint8_t SD_RSB(uint32_t addr, uint8_t *buf, uint8_t *token)
 	SD_Command(17, addr, 0x0);
 	// read R1
 	res1 = SD_readRes1();
+	SD_printR1(res1);
+
 	// if response received from card
 	if(res1 != 0xFF)
 	{
-		USART_Send("\r\n Read Attempts= "); USART_Int_StrBIT(res1,0);	
+		USART_Send("\r\n Read Attempts= "); 
 		// wait for a response token (timeout = 100ms)
 		readAttempts = 0;
-		
+
 		while(++readAttempts != SD_MAX_READ_ATTEMPTS){
 		if((read = SPI_transfer(0xFF)) == 0xFE) break;
 		}
-			
+
 		if(read == 0xFE)
 		{
 					
 			// read 512 byte block
-			for(uint16_t i = 0; i < 512; i++) *buf++ = SPI_transfer(0xFF);
+			for(uint16_t i = 0; i < 512; i++) *buf[i] = SPI_transfer(0xFF);
 
 			// read 16-bit CRC
 			SPI_transfer(0xFF);
@@ -416,7 +345,7 @@ uint8_t SD_WSB(uint32_t addr, uint8_t *buf)
 
 	// read response
 	res[0] = SD_readRes1();
-
+ SD_printR1(res[0]);
 	// if no error
 	if(res[0] == SD_READY)
 	{
@@ -440,7 +369,7 @@ uint8_t SD_WSB(uint32_t addr, uint8_t *buf)
 			// wait for write to finish (timeout = 250ms)
 			readAttempts = 0;
 			while(SPI_transfer(0xFF) == 0x00)
-			if(++readAttempts == SD_MAX_WRITE_ATTEMPTS) { token = 0x00; break;}
+			if(++readAttempts == SD_MAX_WRITE_ATTEMPTS) { token = 0x00; USART_Send("\r\nFail");break; }
 		}
 	}
 
