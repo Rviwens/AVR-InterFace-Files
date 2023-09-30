@@ -188,43 +188,45 @@ uint8_t SD_sendOpCond()
 	return res1;
 }
 
-// 
-// 
-// void SD_initREAD(){
-// SD_powerUpSeq();
-// uint8_t res[5];
-// USART_Send("Sending CMD0: \r\n");
-// res[0] = SD_goIdleState();
-// USART_Send("Response: \r\n");
-// SD_printR1(res[0]);
-// USART_Send("res7: \r\n");
-// SD_sendIfCond(res);
-// USART_Send("Sending CMD8: \r\n");
-// SD_printR7(res);
-// USART_Send("Sending CMD58: \r\n");
-// SD_readOCR(res); 
-// USART_Send("Response: \r\n");
-// SD_printR3(res);
-// do
-// {
-// USART_Send("Sending CMD55: \r\n");
-// res[0]=SD_sendApp();
-// USART_Send("Response: \r\n");
-// SD_printR1(res[0]);
-// USART_Send("Sending ACMD41: \r\n");
-// res[0]=SD_sendOpCond();
-// USART_Send("Response: \r\n");
-// SD_printR1(res[0]);
-// 
-//  _delay_ms(100);
-// }
-//  while(res[0]!=0x0);
-//   USART_Send("Sending CMD58: \r\n");
-//   SD_readOCR(res);
-//   USART_Send("Response: \r\n");
-//   SD_printR3(res);
-// }
 
+
+
+#if defined(USARTSD)
+void SD_initREAD(){
+SD_powerUpSeq();
+uint8_t res[5];
+USART_Send("Sending CMD0: \r\n");
+res[0] = SD_goIdleState();
+USART_Send("Response: \r\n");
+SD_printR1(res[0]);
+USART_Send("res7: \r\n");
+SD_sendIfCond(res);
+USART_Send("Sending CMD8: \r\n");
+SD_printR7(res);
+USART_Send("Sending CMD58: \r\n");
+SD_readOCR(res); 
+USART_Send("Response: \r\n");
+SD_printR3(res);
+do
+{
+USART_Send("Sending CMD55: \r\n");
+res[0]=SD_sendApp();
+USART_Send("Response: \r\n");
+SD_printR1(res[0]);
+USART_Send("Sending ACMD41: \r\n");
+res[0]=SD_sendOpCond();
+USART_Send("Response: \r\n");
+SD_printR1(res[0]);
+
+ _delay_ms(100);
+}
+ while(res[0]!=0x0);
+  USART_Send("Sending CMD58: \r\n");
+  SD_readOCR(res);
+  USART_Send("Response: \r\n");
+  SD_printR3(res);
+}
+#endif
 
 
 
@@ -304,11 +306,11 @@ return 5;
 
 
 #if defined(SDRSB)
-uint8_t token;	
-uint8_t SD_RSB(uint32_t addr, uint8_t *buf[], uint8_t *token)
+uint8_t SD_RSB(uint8_t *buf[], uint32_t addr, uint8_t *token)
 {
-	uint8_t res1, read;
+	uint8_t res1, read,token;
 	uint16_t readAttempts;
+	
 	// set token to none
 	*token = 0xFF;
 	// assert chip select
@@ -324,10 +326,8 @@ uint8_t SD_RSB(uint32_t addr, uint8_t *buf[], uint8_t *token)
 	// if response received from card
 	if(res1 != 0xFF)
 	{
-		USART_Send("\r\n Read Attempts= "); 
 		// wait for a response token (timeout = 100ms)
 		readAttempts = 0;
-
 		while(++readAttempts != SD_MAX_READ_ATTEMPTS){
 		if((read = SPI_transfer(0xFF)) == 0xFE) break;
 		}
@@ -342,17 +342,8 @@ uint8_t SD_RSB(uint32_t addr, uint8_t *buf[], uint8_t *token)
 			SPI_transfer(0xFF);
 			SPI_transfer(0xFF);
 		}
-
-		// set token to card response
-		*token = read;
+*token=read;
 	}
-
-	// deassert chip select
-	SPI_transfer(0xFF);
-	CS_DE;
-	SPI_transfer(0xFF);
-
-	return res1;
 }
 #endif
 
