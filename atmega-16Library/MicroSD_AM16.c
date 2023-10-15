@@ -19,9 +19,9 @@
 
 
 
-#define SD_READY  0x01
+#define SD_READY  0x00
 #define SD_MAX_READ_ATTEMPTS    62500
-#define SD_MAX_WRITE_ATTEMPTS    1562500
+#define SD_MAX_WRITE_ATTEMPTS    162500
 // #define SD_SUCCESS  0
 // #define SD_ERROR    1
 
@@ -65,7 +65,7 @@ while((res1 = SPI_transfer(0xFF)) == 0xFF) // while SPDR is 0xFF until Received 
 {
 i++;
 // if no data received for 8 bytes, break
-if(i > 8) break;
+if(i > 8){res1= 128;break;}
 }
 //USART_Int_StrBIT(res1,0);
 return res1;
@@ -306,9 +306,9 @@ return 5;
 
 
 #if defined(SDRSB)
-uint8_t SD_RSB(uint8_t *buf[], uint32_t addr, uint8_t *token)
+void SD_RSB(char buf[511], uint32_t addr, uint8_t *token)
 {
-	uint8_t res1, read,token;
+	uint8_t res1, read;
 	uint16_t readAttempts;
 	
 	// set token to none
@@ -332,24 +332,21 @@ uint8_t SD_RSB(uint8_t *buf[], uint32_t addr, uint8_t *token)
 		if((read = SPI_transfer(0xFF)) == 0xFE) break;
 		}
 
+		
 		if(read == 0xFE)
 		{
-					
+			
 			// read 512 byte block
-			for(uint16_t i = 0; i < 512; i++) *buf[i] = SPI_transfer(0xFF);
-
+			for(uint16_t i = 0; i < 512; i++) {buf[i]=SPI_transfer(0xFF);}
 			// read 16-bit CRC
 			SPI_transfer(0xFF);
 			SPI_transfer(0xFF);
 		}
 *token=read;
 	}
+
 }
 #endif
-
-
-
-
 
 
 
@@ -358,57 +355,63 @@ uint8_t SD_RSB(uint8_t *buf[], uint32_t addr, uint8_t *token)
 
 
 #if defined(SDWSB)
-uint8_t SD_WSB(uint32_t addr, uint8_t *buf)
+void SD_WSB(char buf[511],uint32_t addr, uint8_t *token)
 {
 	uint32_t readAttempts;
 	uint8_t read;
     uint8_t res[5];
 	// set token to none
-	token = 0xFF;
+	*token = 0xFF;
 
 	// assert chip select
 	SPI_transfer(0xFF);
 	CS_EN;
 	SPI_transfer(0xFF);
 
-	// send CMD24
+	// send CMD24d s
 	SD_Command(24, addr, 0x0);
 
 	// read response
+	
 	res[0] = SD_readRes1();
- //SD_printR1(res[0]);
-	// if no error
-	if(res[0] == SD_READY)
-	{
-		// send start token
-		SPI_transfer(0xFE);
+	
+ if(res[0] == SD_READY)
+ {
+	 // send start token
+	 SPI_transfer(0xFE);
 
-		// write buffer to card
-		for(uint16_t i = 0; i < 512; i++) SPI_transfer(buf[i]);
+	 // write buffer to card
+	 for(uint16_t i = 0; i < 512; i++) SPI_transfer(buf[i]);
 
-		// wait for a response (timeout = 250ms)
-		readAttempts = 0;
-		while(++readAttempts != SD_MAX_WRITE_ATTEMPTS)
-		if((read = SPI_transfer(0xFF)) != 0xFF) { token = 0xFF; break; }
-
-		// if data accepted
-		if((read & 0x1F) == 0x05)
-		{
-			// set token to data accepted
-			token = 0x05;
-
-			// wait for write to finish (timeout = 250ms)
-			readAttempts = 0;
-			while(SPI_transfer(0xFF) == 0x00)
-			if(++readAttempts == SD_MAX_WRITE_ATTEMPTS) { token = 0x00; USART_Send("\r\nFail");break; }
-		}
-	}
-
-	// deassert chip select
-	SPI_transfer(0xFF);
-	CS_DE;
-	SPI_transfer(0xFF);
-
-	return res[0];
+	 // wait for a response (timeout = 250ms)
+	 readAttempts=0;
+	 while(++readAttempts != SD_MAX_WRITE_ATTEMPTS)
+	 if((read = SPI_transfer(0xFF)) != 0xFF) { *token = 0xFF; break; }   		 
+		 	
 }
+ }
 #endif
+
+
+
+
+
+// For reading and writing files in FAT32
+
+char StatusBuf[511];
+
+
+void FAT32_Valid(){
+	
+SD_RSB(StatusBuf,0,&token);
+
+if((StatusBuf[510]==0x55)&&(StatusBuf[511]==0xAA)){
+USART_Send("\r\n Vaild");		
+}
+}
+
+
+
+
+
+

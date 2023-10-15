@@ -100,7 +100,7 @@ char SPI_SR()			/* SPI Receive data function */
 #if defined(SPITX)
 uint8_t SPI_transfer(uint8_t data)
 {
-	SPDR = 0xFF;
+	SPDR = data;
 	while(!(SPSR & (1<<SPIF)));	/* Wait till reception complete */
 	return(SPDR);
 }
