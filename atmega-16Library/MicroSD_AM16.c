@@ -15,13 +15,12 @@
 
 #define CS_DE PORTA|=(1<<0);
 #define CS_EN PORTA&=~(1<<0);
-
-
-
+#define DataBuffSize 511
 
 #define SD_READY  0x00
 #define SD_MAX_READ_ATTEMPTS    62500
 #define SD_MAX_WRITE_ATTEMPTS    162500
+
 // #define SD_SUCCESS  0
 // #define SD_ERROR    1
 
@@ -306,7 +305,7 @@ return 5;
 
 
 #if defined(SDRSB)
-void SD_RSB(char buf[511], uint32_t addr, uint8_t *token)
+void SD_RSB(char buf[DataBuffSize], uint32_t addr, uint8_t *token)
 {
 	uint8_t res1, read;
 	uint16_t readAttempts;
@@ -337,7 +336,7 @@ void SD_RSB(char buf[511], uint32_t addr, uint8_t *token)
 		{
 			
 			// read 512 byte block
-			for(uint16_t i = 0; i < 512; i++) {buf[i]=SPI_transfer(0xFF);}
+			for(uint16_t i = 0; i <= DataBuffSize; i++) {buf[i]=SPI_transfer(0xFF);}
 			// read 16-bit CRC
 			SPI_transfer(0xFF);
 			SPI_transfer(0xFF);
@@ -355,7 +354,7 @@ void SD_RSB(char buf[511], uint32_t addr, uint8_t *token)
 
 
 #if defined(SDWSB)
-void SD_WSB(char buf[511],uint32_t addr, uint8_t *token)
+void SD_WSB(char buf[DataBuffSize],uint32_t addr, uint8_t *token)
 {
 	uint32_t readAttempts;
 	uint8_t read;
@@ -381,7 +380,7 @@ void SD_WSB(char buf[511],uint32_t addr, uint8_t *token)
 	 SPI_transfer(0xFE);
 
 	 // write buffer to card
-	 for(uint16_t i = 0; i < 512; i++) SPI_transfer(buf[i]);
+	 for(uint16_t i = 0; i <= DataBuffSize; i++) SPI_transfer(buf[i]);
 
 	 // wait for a response (timeout = 250ms)
 	 readAttempts=0;
@@ -398,17 +397,26 @@ void SD_WSB(char buf[511],uint32_t addr, uint8_t *token)
 
 // For reading and writing files in FAT32
 
-char StatusBuf[511];
+#if defined(FAT32)
 
+unsigned int Storage[10];
 
-void FAT32_Valid(){
-	
-SD_RSB(StatusBuf,0,&token);
+char FAT32_Init(){
+	SD_RSB(StatusBuff,0,&token);
 
-if((StatusBuf[510]==0x55)&&(StatusBuf[511]==0xAA)){
-USART_Send("\r\n Vaild");		
+	if((StatusBuff[510]==0x55)&&(StatusBuff[511]==0xAA)){
+		USART_Send("\r\n Valid");
+	}else{return 0;}
+long RootDirSec = (StatusBuff[15]*256+StatusBuff[14])+((StatusBuff[38]*4096+StatusBuff[37]*256+StatusBuff[36])*StatusBuff[16]);
+long long DataDirSec = RootDirSec;
+
+/* + ((32 * (StatusBuff[18]*256+StatusBuff[17]) + (StatusBuff[12]*256+StatusBuff[11]) - 1) / (StatusBuff[12]*256+StatusBuff[11])); */
+USART_Send("\r\n Help ");
+USART_Long_Str(RootDirSec,0);
 }
-}
+#endif
+// 
+
 
 
 

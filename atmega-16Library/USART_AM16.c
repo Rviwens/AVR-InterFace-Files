@@ -90,7 +90,7 @@ void USART_Send_ESS(char str[],int ES){
 }
 
 
-char NUM_Hold[10];
+char NUM_Hold[20];
 void USART_Int_Str(int I, int ES){
 itoa(I,NUM_Hold,10);
 USART_Send_ESS(NUM_Hold,ES);
@@ -103,10 +103,21 @@ void USART_Int_StrHEX(int I, int ES){
 	USART_Send("0x");
 	itoa(I,NUM_Hold,16);
 	USART_Send_ESS(NUM_Hold,ES);
-	
 }
+
+	void USART_Int_StrHEXRAW(int I, int ES){
+		itoa(I,NUM_Hold,16);
+		if (I ==0) USART_Send_ESS("0",0);
+		USART_Send_ESS(NUM_Hold,ES);
+
+}
+
 void USART_Long_Str(long I, int ES){
 	ltoa(I,NUM_Hold,10);
+	USART_Send_ESS(NUM_Hold,ES);
+}
+void USART_Long_StrHEX(long I, int ES){
+	ltoa(I,NUM_Hold,16);
 	USART_Send_ESS(NUM_Hold,ES);
 }
 #endif
