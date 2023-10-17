@@ -399,7 +399,9 @@ void SD_WSB(char buf[DataBuffSize],uint32_t addr, uint8_t *token)
 
 #if defined(FAT32)
 
-unsigned int Storage[10];
+long RootDirSec;
+char MBR=0;
+char FSInfo = 1; 
 
 char FAT32_Init(){
 	SD_RSB(StatusBuff,0,&token);
@@ -407,15 +409,69 @@ char FAT32_Init(){
 	if((StatusBuff[510]==0x55)&&(StatusBuff[511]==0xAA)){
 		USART_Send("\r\n Valid");
 	}else{return 0;}
-long RootDirSec = (StatusBuff[15]*256+StatusBuff[14])+((StatusBuff[38]*4096+StatusBuff[37]*256+StatusBuff[36])*StatusBuff[16]);
-long long DataDirSec = RootDirSec;
-
-/* + ((32 * (StatusBuff[18]*256+StatusBuff[17]) + (StatusBuff[12]*256+StatusBuff[11]) - 1) / (StatusBuff[12]*256+StatusBuff[11])); */
-USART_Send("\r\n Help ");
-USART_Long_Str(RootDirSec,0);
+RootDirSec = (StatusBuff[15]*256+StatusBuff[14])+ (( (StatusBuff[38]*65536) + ((unsigned) StatusBuff[37]*256) + (StatusBuff[36])) *StatusBuff[16]);
 }
+
+
+void FAT32_Open_File(char str[]){
+char locX =0;
+char locI =0;	
+short flag=1;
+char Attr =0;
+uint32_t Clust;
+
+//Find Location of file 
+	for (int i=0; i<0xFFFF; i++){
+		
+		SD_RSB(StatusBuff,RootDirSec+i,&token);
+		
+		for(int x=0; x<= 511; x++){
+			
+			if(StatusBuff[x]==str[0]){
+	           flag=1; 
+				
+				for(int y=0; y <strlen(str); y++){
+					if (StatusBuff[x+y]!=str[0+y]){flag=0;}
+				}
+				
+				if(flag!=0){
+					locX=x;
+					locI=i;
+					USART_Send("Found");
+					flag =2;
+					break;
+				}
+		if(flag==2){break;}	
+		}
+	if(flag==2){break;}
+	}	
+if(flag==2){break;}
+}
+
+if(flag !=0){
+SD_RSB(StatusBuff,RootDirSec+locI,&token);
+Attr=StatusBuff[locX+0x0B];
+
+
+USART_Int_StrHEXRAW(StatusBuff[locX+0x14-1],0);
+USART_Int_StrHEXRAW(StatusBuff[locX+0x14],0);
+USART_Int_StrHEXRAW(StatusBuff[locX+0x1a-1],0);
+USART_Int_StrHEXRAW(StatusBuff[locX+0x1a],0);
+
+USART_Send("\r\n");
+for(int t = locX; t<locX+32; t++){USART_Int_StrHEXRAW(StatusBuff[t],0);}
+}
+
+}
+
 #endif
-// 
+
+
+
+	// 	 USART_Send("\r\n |");
+	// 	 USART_Send("Index =");
+	// 	 USART_Int_Str(i,0);
+	// 	 USART_Send("| ");
 
 
 
