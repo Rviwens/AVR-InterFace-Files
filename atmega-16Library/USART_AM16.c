@@ -107,7 +107,7 @@ void USART_Int_StrHEX(int I, int ES){
 
 	void USART_Int_StrHEXRAW(int I, int ES){
 		itoa(I,NUM_Hold,16);
-		if (I ==0) USART_Send_ESS("0",0);
+		if (I ==0 || I<=0xF) USART_Send_ESS("0",0);
 		USART_Send_ESS(NUM_Hold,ES);
 
 }

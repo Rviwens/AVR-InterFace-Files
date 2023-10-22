@@ -410,6 +410,7 @@ char FAT32_Init(){
 		USART_Send("\r\n Valid");
 	}else{return 0;}
 RootDirSec = (StatusBuff[15]*256+StatusBuff[14])+ (( (StatusBuff[38]*65536) + ((unsigned) StatusBuff[37]*256) + (StatusBuff[36])) *StatusBuff[16]);
+return 0;
 }
 
 
@@ -418,13 +419,12 @@ char locX =0;
 char locI =0;	
 short flag=1;
 char Attr =0;
-uint32_t Clust;
-
+//uint32_t Clust;
+RDS = RootDirSec; 
 //Find Location of file 
 	for (int i=0; i<0xFFFF; i++){
 		
 		SD_RSB(StatusBuff,RootDirSec+i,&token);
-		
 		for(int x=0; x<= 511; x++){
 			
 			if(StatusBuff[x]==str[0]){
@@ -437,7 +437,7 @@ uint32_t Clust;
 				if(flag!=0){
 					locX=x;
 					locI=i;
-					USART_Send("Found");
+					USART_Send("\r\nFound\r\n");
 					flag =2;
 					break;
 				}
@@ -453,15 +453,47 @@ SD_RSB(StatusBuff,RootDirSec+locI,&token);
 Attr=StatusBuff[locX+0x0B];
 
 
-USART_Int_StrHEXRAW(StatusBuff[locX+0x14-1],0);
+USART_Int_StrHEXRAW(StatusBuff[locX+0x14+1],0);
 USART_Int_StrHEXRAW(StatusBuff[locX+0x14],0);
-USART_Int_StrHEXRAW(StatusBuff[locX+0x1a-1],0);
+USART_Int_StrHEXRAW(StatusBuff[locX+0x1a+1],0);
 USART_Int_StrHEXRAW(StatusBuff[locX+0x1a],0);
 
+
+uint32_t ClustAddr = (65536*(StatusBuff[locX+0x15])) + (4096*(StatusBuff[locX+0x14])) +(256*(StatusBuff[locX+0x1B])) + (StatusBuff[locX+0x1a]);
 USART_Send("\r\n");
-for(int t = locX; t<locX+32; t++){USART_Int_StrHEXRAW(StatusBuff[t],0);}
+USART_Send("ClustAddr =");
+USART_Long_Str(ClustAddr,0);
+USART_Send("\r\n");
+
+
+for(int t = locX; t<locX+32; t++){       
+	USART_Send("\r\nIndex =");
+	USART_Int_Str(t-locX,0);
+	USART_Send("=| ");
+	USART_Int_StrHEXRAW(StatusBuff[t],0);
 }
 
+
+SD_RSB(StatusBuff,RootDirSec+(8*(ClustAddr-2)),&token);
+USART_Send("\r\n");
+USART_Send("\r\n");
+
+for(int t = 0; t<512; t++){
+USART_Int_StrHEXRAW(StatusBuff[t],0);
+}
+
+if(StatusBuff[511]!=0xFF){
+SD_RSB(StatusBuff,RootDirSec+(8*(ClustAddr-2)+1),&token);
+USART_Send("\r\n");
+USART_Send("\r\n");
+
+for(int t = 0; t<512; t++){
+	USART_Int_StrHEXRAW(StatusBuff[t],0);
+}	
+}
+
+
+}
 }
 
 #endif
