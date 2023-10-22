@@ -19,11 +19,11 @@ main.d main.o: .././main.c .././Link.c \
  c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\stdlib.h \
  c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\avr\interrupt.h \
  c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\string.h \
- ../../../../../AVR-InterFace-Libary/atmega-16Library/AM16_Timer_Functions.c \
- ../../../../../AVR-InterFace-Libary/atmega-16Library/USART_AM16.c \
- ../../../../../AVR-InterFace-Libary/atmega-16Library/SPI_ATM16.c \
- ../../../../../AVR-InterFace-Libary/atmega-16Library/MicroSD_AM16.c \
- ../../../../../AVR-InterFace-Libary/atmega-16Library/SD_RES_OUTPUT.c
+ ../../../../../AVR-InterFace-Files-main/AVR-InterFace-Files-main/atmega-16Library/AM16_Timer_Functions.c \
+ ../../../../../AVR-InterFace-Files-main/AVR-InterFace-Files-main/atmega-16Library/USART_AM16.c \
+ ../../../../../AVR-InterFace-Files-main/AVR-InterFace-Files-main/atmega-16Library/SPI_ATM16.c \
+ ../../../../../AVR-InterFace-Files-main/AVR-InterFace-Files-main/atmega-16Library/MicroSD_AM16.c \
+ ../../../../../AVR-InterFace-Files-main/AVR-InterFace-Files-main/atmega-16Library/SD_RES_OUTPUT.c
 
 .././Link.c:
 
@@ -67,12 +67,12 @@ c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\
 
 c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\string.h:
 
-../../../../../AVR-InterFace-Libary/atmega-16Library/AM16_Timer_Functions.c:
+../../../../../AVR-InterFace-Files-main/AVR-InterFace-Files-main/atmega-16Library/AM16_Timer_Functions.c:
 
-../../../../../AVR-InterFace-Libary/atmega-16Library/USART_AM16.c:
+../../../../../AVR-InterFace-Files-main/AVR-InterFace-Files-main/atmega-16Library/USART_AM16.c:
 
-../../../../../AVR-InterFace-Libary/atmega-16Library/SPI_ATM16.c:
+../../../../../AVR-InterFace-Files-main/AVR-InterFace-Files-main/atmega-16Library/SPI_ATM16.c:
 
-../../../../../AVR-InterFace-Libary/atmega-16Library/MicroSD_AM16.c:
+../../../../../AVR-InterFace-Files-main/AVR-InterFace-Files-main/atmega-16Library/MicroSD_AM16.c:
 
-../../../../../AVR-InterFace-Libary/atmega-16Library/SD_RES_OUTPUT.c:
+../../../../../AVR-InterFace-Files-main/AVR-InterFace-Files-main/atmega-16Library/SD_RES_OUTPUT.c:

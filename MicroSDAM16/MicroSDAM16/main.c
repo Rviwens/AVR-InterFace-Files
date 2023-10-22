@@ -7,11 +7,6 @@
 int main(void)
 {
 
-// memset(buff,59,512);
-
-DDRA=0xF;
-PORTA=0xF;
-
 USART_init(0,8,9600);
 SPI_MAST_Init(0,128,0,0,0);
 
@@ -20,10 +15,44 @@ char SDIS = SD_Init();
 USART_Send("\r\nHello Void. I have awoken\r\n Response | ");
 USART_Int_Str(SDIS,0);
 
- if(SDIS==5){
+
+if(SDIS==5){
 FAT32_Init();
-FAT32_Open_File("VOID");
-SD_RSB(StatusBuff,0x5700576,&token);	
-return 0xFF; 	
+
+
+
+// SD_RSB(StatusBuff,0,&token);
+// USART_Send("\r\n");
+// 
+// for (int u =0; u<512; u++)
+// {
+// 		 USART_Send("\r\n |");
+// 	 	 USART_Send("Index =");
+// 	 	 USART_Int_Str(u,0);
+// 	 	 USART_Send("| ");	
+// USART_Int_Str(StatusBuff[u],0);
+// 
+// }
+
+
+USART_Send("\r\n");
+FAT32_Open_File("HELLO");
+
+
+
+// for (long gh =RDS; gh<=(0xFF+RDS); gh++)
+// {
+// SD_RSB(StatusBuff,gh,&token);
+// USART_Send("\r\n");	
+// for (int u =0; u<512; u++)
+// {
+// USART_Int_Str(StatusBuff[u],0);	
+// }
+// }
+// 
+
+
+
+
 }
 }

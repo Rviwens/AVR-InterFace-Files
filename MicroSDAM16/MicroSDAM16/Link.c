@@ -19,7 +19,7 @@ char StatusBuff[511];
 
 
 char token;
-
+long RDS;
 
 
 
