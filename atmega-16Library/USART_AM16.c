@@ -60,10 +60,6 @@ void T(){if(BAUD<=9000){_delay_ms(1);}if(BAUD<=5000){_delay_ms(9);}if(BAUD<=1200
 
 
 
-
-
-
-
 #if defined(USARTTX)
 void USART_TxChar(char ch){
 while(!(UCSRA & (1<<UDRE)));	/* Wait for empty transmit buffer*/
