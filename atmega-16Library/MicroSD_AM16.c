@@ -21,6 +21,8 @@
 #define SD_MAX_READ_ATTEMPTS    62500
 #define SD_MAX_WRITE_ATTEMPTS    162500
 
+
+#define SDpwPin PINA1
 // #define SD_SUCCESS  0
 // #define SD_ERROR    1
 
@@ -47,7 +49,7 @@ void SD_powerUpSeq()
 	// give SD card time to power up
 	_delay_ms(1);
 	// send 80 clock cycles to synchronize
-	for(uint8_t i = 0; i < 10; i++){
+	for(uint8_t i = 0; i < 80; i++){
 		CS_EN;
 	SPI_Write(0xFF);}
 	// deselect SD card
@@ -55,6 +57,14 @@ void SD_powerUpSeq()
 	SPI_Write(0xFF);
 }
 
+
+void SD_Reset(){
+DDRA=0;
+PORTA=0;
+_delay_ms(100);	
+DDRA=(1<<SDpwPin);
+PORTA=(1<<SDpwPin);
+}
 
 uint8_t SD_readRes1()
 {
@@ -290,7 +300,8 @@ return 5;
 
 
 
-
+ 
+	
 
 
 
