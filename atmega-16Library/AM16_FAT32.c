@@ -80,38 +80,90 @@ char FAT32_Init(){
 
 
 	//
-	void FAT32_Read_File(char str[]){
-		FAT32_Open_File(str);
+void FAT32_Read_File(char str[]){
+FAT32_Open_File(str);
         
-		
-// 	SD_RSB(StatusBuff,FATStartSec,&token);	
-// 	
-// 	 for(int t = 0; t<512; t++){
-// 	 	USART_Int_StrHEXRAW(StatusBuff[t],0);
-// 	 }
+// FAT32[First Data Cluster]--> Next Data Cluster of Data; 	
+//I.E In the FAT32 Primary FAT, The index of (FirstDataCluster*2) (2 for 2 bytes) gives the index of the next cluster(bits 0-6)and the cluster location (bits 7-511); 
+	
+	 
+//SD_RSB(StatusBuff,FATStartSec,&token);	
+// 
+// 
+// USART_Send("\r\n Primary FAT Sector[");
+// USART_Long_Str(FATStartSec,0);
+// USART_Send("]\r\n");
+// 
+// for (int i=0;i<128+1;i++)
+// {
+// USART_Send("\r\n");	
+// 	for (int rd = (i*4); rd<(i*4)+4; rd++)
+// 	USART_Int_StrHEXRAW(StatusBuff[rd],0);
+// 
+// }
 
 
 
-		for (long Sc = RootDirSec+(8*(ClustAddr-2));Sc<=(RootDirSec+(8*(ClustAddr-2)))+5 ;Sc++)
-		{
-			SD_RSB(StatusBuff,Sc,&token);
-			
-			for (int rd =0; rd<=512; rd++)
-			USART_Int_StrHEXRAW(StatusBuff[rd],0);
-
-		}
-	}
-
-
-	void FAT32_Create_File(){
-		
-	}
+// USART_Send("\r\n\r\n\r\n\r\n  Data Cluster[]\r\n");
+// 
+// 
+// for (long Sc = RootDirSec+(8*(ClustAddr-2));Sc<(RootDirSec+(8*(ClustAddr-2)))+8;Sc++)
+// {
+// 	SD_RSB(StatusBuff,Sc,&token);
+// 	for (int rd =0; rd<512; rd++)
+// 		USART_Int_StrHEXRAW(StatusBuff[rd],0);
+// 
+// }
 
 
-	void FAT32_Delete_File(){
-		
-	}
-	#endif
+SD_RSB(StatusBuff,FATStartSec,&token);
+
+
+USART_Send("\r\n Next Clst in Primary FAT Sector[");
+USART_Send("]\r\n");
+
+for (int rd = (ClustAddr*4); rd<(ClustAddr*4)+4; rd++)
+USART_Int_StrHEXRAW(StatusBuff[rd],0);
+
+
+uint32_t NextClst = (StatusBuff[ClustAddr*4]*16777216)+(StatusBuff[(ClustAddr*4)+1]*65536)+(StatusBuff[(ClustAddr*4)+2]*256)+(StatusBuff[(ClustAddr*4)+3]);
+
+uint8_t  NextClstAddr = NextClst & 0xFFFFFFC0;
+NextClst = NextClst>>6; 
+
+
+
+USART_Send("\r\n\r\n\r\n Second Cluster[");
+USART_Long_StrHEX(NextClst,0);
+USART_Send("] Sector[");
+USART_Long_Str(8*(NextClst-2),0);
+USART_Send("]\r\n");
+
+// for ( int i =0; i<8; i++)
+// {
+// SD_RSB(StatusBuff,NextClst+i,&token);
+// 		for (int rd =0; rd<512; rd++)
+// 		USART_Int_StrHEXRAW(StatusBuff[rd],0);
+// 
+// }
+
+}
+
+
+void FAT32_Create_File(){}
+void FAT32_Delete_File(){}
+	
+	
+void FAT32_Clear(uint32_t AddrS, uint32_t AddrE){
+	memset(StatusBuff,0,511);	
+	for(uint32_t t= AddrS; t<=AddrE;t++)
+	{	
+		SD_WSB(StatusBuff,t,&token);
+ 
+	}		
+}
+	
+#endif
 
 
 
