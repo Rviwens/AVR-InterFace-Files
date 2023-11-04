@@ -3,6 +3,9 @@
 #include <USART_AM16.c>
 #include <SPI_ATM16.c>
 #include <MicroSD_AM16.c>
+#include <AM16_FAT32.c>
+
+//#define SDcsp PINA0
 
 int main(void)
 {
@@ -16,43 +19,17 @@ USART_Send("\r\nHello Void. I have awoken\r\n Response | ");
 USART_Int_Str(SDIS,0);
 
 
+if(SDIS!=5){
+	
+	
+SD_Reset();
+}
+
+
 if(SDIS==5){
 FAT32_Init();
-
-
-
-// SD_RSB(StatusBuff,0,&token);
-// USART_Send("\r\n");
-// 
-// for (int u =0; u<512; u++)
-// {
-// 		 USART_Send("\r\n |");
-// 	 	 USART_Send("Index =");
-// 	 	 USART_Int_Str(u,0);
-// 	 	 USART_Send("| ");	
-// USART_Int_Str(StatusBuff[u],0);
-// 
-// }
-
-
 USART_Send("\r\n");
-FAT32_Open_File("HELLO");
 
-
-
-// for (long gh =RDS; gh<=(0xFF+RDS); gh++)
-// {
-// SD_RSB(StatusBuff,gh,&token);
-// USART_Send("\r\n");	
-// for (int u =0; u<512; u++)
-// {
-// USART_Int_Str(StatusBuff[u],0);	
-// }
-// }
-// 
-
-
-
-
+FAT32_Read_File("HELLO");
 }
 }

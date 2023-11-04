@@ -23,7 +23,8 @@ main.d main.o: .././main.c .././Link.c \
  ../../../../../AVR-InterFace-Files-main/AVR-InterFace-Files-main/atmega-16Library/USART_AM16.c \
  ../../../../../AVR-InterFace-Files-main/AVR-InterFace-Files-main/atmega-16Library/SPI_ATM16.c \
  ../../../../../AVR-InterFace-Files-main/AVR-InterFace-Files-main/atmega-16Library/MicroSD_AM16.c \
- ../../../../../AVR-InterFace-Files-main/AVR-InterFace-Files-main/atmega-16Library/SD_RES_OUTPUT.c
+ ../../../../../AVR-InterFace-Files-main/AVR-InterFace-Files-main/atmega-16Library/SD_RES_OUTPUT.c \
+ ../../../../../AVR-InterFace-Files-main/AVR-InterFace-Files-main/atmega-16Library/AM16_FAT32.c
 
 .././Link.c:
 
@@ -76,3 +77,5 @@ c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\
 ../../../../../AVR-InterFace-Files-main/AVR-InterFace-Files-main/atmega-16Library/MicroSD_AM16.c:
 
 ../../../../../AVR-InterFace-Files-main/AVR-InterFace-Files-main/atmega-16Library/SD_RES_OUTPUT.c:
+
+../../../../../AVR-InterFace-Files-main/AVR-InterFace-Files-main/atmega-16Library/AM16_FAT32.c:
