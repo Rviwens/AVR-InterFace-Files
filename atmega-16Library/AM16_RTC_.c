@@ -24,11 +24,11 @@ void RTC_Clock_Write(char _hour, char _minute, char _second, char AMPM)
 	_hour|=(AMPM<<5);
 	_hour|=(1<<6);
 	I2C_Start(Device_Write_address);/* Start I2C communication with RTC */
-	I2C_Write(0);			/* Write 0 address for second */
+I2C_Write(0);			/* Write 0 address for second */
 	I2C_Write(_second);		/* Write second on 00 location */
 	I2C_Write(_minute);		/* Write minute on 01(auto increment) location */
 	I2C_Write(_hour);		/* Write hour on 02 location */
-	I2C_Stop();			/* Stop I2C communication */
+ 	I2C_Stop();			/* Stop I2C communication */
 
 	
 }
@@ -90,9 +90,9 @@ void RTC_Read_Calendar(char*str[])
 	date= (date&0b00001111)+(((date&0b00110000)>>4)*10);
 		month= (month&0b00001111)+(((month&0b00010000)>>4)*10);
 		year= (year&0b00001111)+(((year&0b11110000)>>4)*10);
-	str[3]=day;
-	str[4]=date;
-	str[5]=month;
-	str[6]=year;
+	str[4]=day;
+	str[5]=date;
+	str[6]=month;
+	str[7]=year;
 }
 

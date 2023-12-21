@@ -316,13 +316,13 @@ return 5;
 
 
 #if defined(SDRSB)
-void SD_RSB(char buf[DataBuffSize], uint32_t addr, uint8_t *token)
+void SD_RSB(char buf[DataBuffSize], long addr)
 {
-	uint8_t res1, read;
+	uint8_t res1;
+	char read =0;
 	uint16_t readAttempts;
+
 	
-	// set token to none
-	*token = 0xFF;
 	// assert chip select
 	SPI_transfer(0xFF);
 	CS_EN;
@@ -352,7 +352,6 @@ void SD_RSB(char buf[DataBuffSize], uint32_t addr, uint8_t *token)
 			SPI_transfer(0xFF);
 			SPI_transfer(0xFF);
 		}
-*token=read;
 	}
 
 }
@@ -365,13 +364,11 @@ void SD_RSB(char buf[DataBuffSize], uint32_t addr, uint8_t *token)
 
 
 #if defined(SDWSB)
-void SD_WSB(char buf[DataBuffSize],uint32_t addr, uint8_t *token)
+void SD_WSB(char buf[DataBuffSize],uint32_t addr)
 {
 	uint32_t readAttempts;
 	uint8_t read;
     uint8_t res[5];
-	// set token to none
-	*token = 0xFF;
 
 	// assert chip select
 	SPI_transfer(0xFF);
@@ -396,7 +393,7 @@ void SD_WSB(char buf[DataBuffSize],uint32_t addr, uint8_t *token)
 	 // wait for a response (timeout = 250ms)
 	 readAttempts=0;
 	 while(++readAttempts != SD_MAX_WRITE_ATTEMPTS)
-	 if((read = SPI_transfer(0xFF)) != 0xFF) { *token = 0xFF; break; }   		 
+	 if((read = SPI_transfer(0xFF)) != 0xFF) { break; }   		 
 		 	
 }
  }

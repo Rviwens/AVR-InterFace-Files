@@ -5,12 +5,12 @@
 #include <stdlib.h>
 #include <avr/interrupt.h>
 #include <math.h>
-
 #define F_CPU 20000000UL
+
 #define Rising  11
 #define Falling 12
 #define TOG 13
-#define OFF 21
+#define OFF 0
 #define SET 22
 #define INV 23
 #define Timer
@@ -77,18 +77,6 @@ OCR0=duty;
 } else if(INPUT == 1){OCR0=VOUT;
 }
 }
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

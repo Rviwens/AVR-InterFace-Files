@@ -12,16 +12,15 @@
 
 
 
-// #if defined(IRCom)
-// 
-// void IR_Init(){
-// 	DDRD|=(1<<FequncyPin);
-// 	Timer2(3,8,OFF);
-// 	Timer2_Compare(80);
-// }
-// 
-// ISR(TIMER2_COMP_vect){PORTD^=(1<<FequncyPin); }
-// #endif
+
+
+void IR_Init(){
+	DDRD|=(1<<FequncyPin);
+	Timer2(3,8,0);
+	Timer2_Compare(80);
+}
+
+ISR(TIMER2_COMP_vect){PORTD^=(1<<FequncyPin); }
 
 
 

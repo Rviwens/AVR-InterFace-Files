@@ -1,14 +1,19 @@
-#define F_CPU 20000000UL
+
 #define Trigger_pin PINA0
 
 
+
+
 int TimerOverflow = 0;
+
+
 
 void SendPulse(void){
 	PORTA |= (1 << Trigger_pin);
 	_delay_us(15);
 	PORTA &= (~(1 << Trigger_pin));
 }
+
 
 
 void HC_SR04_Init(){
@@ -19,11 +24,17 @@ void HC_SR04_Init(){
 	//Set Timer 1 to use Input Capture Pin and keep time
 }
 
+
+
 //Declare Variables
 short ErrorFlag =0;
 long count;
 long double distance;
 long long ErrorCount = 0;
+
+	  
+
+
 
 double HC_SR04_Distance(){
 	HC_SR04_Init();
@@ -84,10 +95,22 @@ double HC_SR04_Distance(){
 }
 
 
+
+
+
+
+
 ISR(TIMER1_OVF_vect)
 {
 	TimerOverflow++;	/* Increment Timer Overflow count */
 }
+
+
+
+
+
+
+
 
 
 

@@ -19,7 +19,7 @@
 #define S3  PD3
 
 
- #define DHT11_PIN PIND6
+ #define DHT11_PIN PIND7
   #define DHT11_PORT PORTD
  #define DHT11_DDR DDRD
  #define DHT11_pin PIND
@@ -84,6 +84,8 @@ CheckSum=Receive_data(); /* store next eight bit in CheckSum */
 }
 }
 
+#if defined(LCD)
+
 void DHT11_Print_Data(){
 LCD_Clear();	
 if (DHE==0){	
@@ -106,16 +108,18 @@ LCD_CursorPostion(0,13);
 LCD_int_Str(CheckSum,10);
 }//else if(DHE==1){LCD_CursorPostion(0,0); LCD_String("Check Connection");}
 }
+#endif
+
 
 void DHT11_USART_Data(int Ebit,int Vbit , int CFbit){
 	if(Vbit==0){
-	USART_Send("|HUM|",Ebit);
+	USART_Send("\r\n |HUM|");
 	USART_Int_Str(I_RH,Ebit);
-	USART_Send("|HN|",Ebit);
+	USART_Send(".");
 	USART_Int_Str(D_RH,Ebit);
-	USART_Send("|TEM|",Ebit);
+	USART_Send("\r\n|TEM|");
 	USART_Int_Str(I_Temp,Ebit);
-	USART_Send("|TN|",Ebit);
+	USART_Send(".");
 	USART_Int_Str(D_Temp,Ebit);
 	}else if(Vbit==1){
 		
@@ -129,10 +133,10 @@ void DHT11_USART_Data(int Ebit,int Vbit , int CFbit){
 		
 	dtoa(HUM,HUMStorage);
 	dtoa(TEMP,TEMPStorage);
-	USART_Send("\r\n|HUM|",Ebit);
-	USART_Send(HUMStorage,Ebit);
-	USART_Send("\r\n|TEM|",Ebit);	
-	USART_Send(TEMPStorage,Ebit);
+	USART_Send("\r\n|HUM|");
+	USART_Send(HUMStorage);
+	USART_Send("\r\n|TEM|");	
+	USART_Send(TEMPStorage);
 	//if(DHE==1){USART_Send("Check Connection",0);}
 	}
 	

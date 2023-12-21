@@ -10,8 +10,7 @@
 /* Define bit rate */
 #define SCL_CLK 400000
 #define BITRATE(TWSR)	((F_CPU/SCL_CLK)-16)/(2*pow(4,(TWSR&((1<<TWPS0)|(1<<TWPS1)))))
-// SCL freq= F_CPU/(16+2(TWBR).4^TWPS)
-// 
+
 // void I2C_Init();											/* I2C initialize function */
 // uint8_t I2C_Start(char);						/* I2C start function */
 // void I2C_Start_NORETURN(uint8_t);
@@ -59,6 +58,7 @@ uint8_t I2C_Start(char write_address)/* I2C start function */
 	else
 	return 3;			/* Else return 3 to indicate SLA+W failed */
 }
+
 void I2C_Start_NORETURN(uint8_t write_address){
 	TWCR=(1<<TWSTA)|(1<<TWEN)|(1<<TWINT);					/* Enable TWI, generate start condition and clear interrupt flag */
 	while (!(TWCR & (1<<TWINT)));	
