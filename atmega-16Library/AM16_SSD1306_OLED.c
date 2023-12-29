@@ -96,7 +96,7 @@ OLED_Invert(Invert);
 // Turn display back on
 I2C_Write(SSD1306_DISPLAYON);
 //I2C_Stop();
-//OLED_Clear();
+OLED_Clear();
 } 
 
 uint8_t     OLEDlineNumber = 0, OLEDcursorPos = 0;
@@ -240,7 +240,7 @@ void OLED_XY_pixel(uint8_t x, uint8_t y, uint8_t *ScreenBuffer, uint8_t PixleSta
 // USART_Int_Str(Page,0);
 // USART_Send("\r\n ShiftData= ");
 // USART_Int_StrBIT(ScreenBuffer[((128*Page)+x)]>>1,0);
-}else{return;}
+}else return;
 }
 
 
@@ -328,13 +328,13 @@ void OLED_Rect(uint8_t x1,uint8_t y1,uint8_t x2,uint8_t y2,uint8_t*SB){
 	OLED_HLine(x1,y1,length,SB);
 	OLED_HLine(x1,y2,length,SB);
 }
-// void OLED_Bitmap(uint8_t*IA, uint8_t*SB){
-// int page=0;
-// int Xpos=0;
-// for (int i=0; i<512; i++)
-// {
-// if(i==128||i==256||i==384){page++;Xpos=0;}
-// OLED_Byte(Xpos,page,SB,IA[i]);
-// Xpos++;
-// }
-// }
+void OLED_Bitmap(uint8_t*IA, uint8_t*SB){
+int page=0;
+int Xpos=0;
+for (int i=0; i<512; i++)
+{
+if(i==128||i==256||i==384){page++;Xpos=0;}
+OLED_Byte(Xpos,page,SB,IA[i]);
+Xpos++;
+}
+}

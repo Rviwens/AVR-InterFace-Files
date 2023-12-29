@@ -1,12 +1,10 @@
-#define F_CPU 20000000UL// Define CPU frequency here 20MHZ
+
 #include <avr/io.h>
-#include <util/delay.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <avr/interrupt.h>
 #include <math.h>
 #include <string.h>
-
 
 
 
@@ -58,6 +56,8 @@ strcat(str1,Zero);
 strcat(str1,str2);
 }
 
+
+#if defined (LCD)
 void LCD_Dtoa(double Num){
 	char str3[10];
 	char Holder1[10];
@@ -69,6 +69,8 @@ void LCD_Dtoa(double Num){
 	strcpy(str3,Holder1);
 	LCD_String(str3);
 }
+#endif
+
 void dtoa(double Num,char*str3){
 	char Holder1[10];
 	char Holder2[6];

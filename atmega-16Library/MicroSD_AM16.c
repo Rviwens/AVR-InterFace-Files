@@ -19,7 +19,7 @@
 
 #define SD_READY  0x00
 #define SD_MAX_READ_ATTEMPTS    62500
-#define SD_MAX_WRITE_ATTEMPTS    162500
+#define SD_MAX_WRITE_ATTEMPTS    62500
 
 
 #define SDpwPin PINA1
