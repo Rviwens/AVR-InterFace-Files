@@ -11,7 +11,7 @@
 
 void IR_Init(){
 DDRB|=(1<<FequncyPin);
-Timer2(8,0,OFF,0,1,0,100);
+Timer2(8,0,OFF,0,1,0,130);//ORC May need to be adjusted, should work between (80-150)
 }
 ISR(TIMER2_COMPA_vect){PORTB^=(1<<FequncyPin);}
 
@@ -47,8 +47,10 @@ void USART_TxChar(char ch){
 	UDR0=ch;
 }
 
+
+void T(){if(BAUD<=9000){_delay_ms(1);}if(BAUD<=5000){_delay_ms(9);}if(BAUD<=1200){_delay_ms(50);}}
+
 void USART_Send(char *str,int ES){
-	double DE=0;
 	for(int i=0;i<strlen(str); i++){
 		USART_TxChar(str[i]);
 		T();
@@ -59,7 +61,7 @@ if (ES==1){
 		USART_TxChar('E');T();
 	}
 }
-void T(){if(BAUD<=9000){_delay_ms(1);}if(BAUD<=5000){_delay_ms(9);}if(BAUD<=1200){_delay_ms(50);}}
+
 
 void USART_Int_Str(int I,int ES){
 	char out[10000];
@@ -67,11 +69,21 @@ void USART_Int_Str(int I,int ES){
 	USART_Send(out,ES);
 }
 
-
-
 unsigned char RxSerialBuffer[Buffer_Size];
 int RXSBWP;
 unsigned char RXSB[Buffer_Size];
+
+	void CheckRx(){
+		if(RxSerialBuffer[RXSBWP-1]=='|' &&RxSerialBuffer[RXSBWP]=='E'){
+			memset(RXSB,0,Buffer_Size);
+			for(int i=1; i<=RXSBWP-3; i++){RXSB[i-1]=RxSerialBuffer[i];}
+			RXSBWP=0;
+			memset(RxSerialBuffer,0,Buffer_Size);
+		}
+	}
+
+
+
 
 ISR(USART_RX_vect){
 	
@@ -81,14 +93,7 @@ ISR(USART_RX_vect){
 	if(RXSBWP>=100){RXSBWP=0;}
 	if(RXSBWP>=10){PORTD^=(1<<PIND4);}}
 	
-	void CheckRx(){
-		if(RxSerialBuffer[RXSBWP-1]=='|' &&RxSerialBuffer[RXSBWP]=='E'){
-			memset(RXSB,0,Buffer_Size);
-			for(int i=1; i<=RXSBWP-3; i++){RXSB[i-1]=RxSerialBuffer[i];}
-			RXSBWP=0;
-			memset(RxSerialBuffer,0,Buffer_Size);
-		}
-	}
+
 	
 	
 	
@@ -107,7 +112,7 @@ ISR(USART_RX_vect){
 			j--;
 		}
 	}
-
+	int upperNum(double op){int Out=op;return Out;}
 
 	// finds the number below the decimal point. Counts how many zeros are between decimal point and number. Returns Number as integer.
 	long lowerNum( long double IN,int BACK){
@@ -121,13 +126,14 @@ ISR(USART_RX_vect){
 		if(R!=IN){IN+=1;}
 		if(BACK==1){return COUNT2;}
 		if(BACK==0){return R;}
+			return 0; 
 	}
 
 	// Clear Zero's  Ex--(900->9)
 	void CLZer(long Num,char*str){ltoa(Num,str,10);reverse(str);long Nh=atol(str);ltoa(Nh,str,10);reverse(str);}
 	
 	/*finds the number above the decimal  point on  turns into a string*/
-	int upperNum(double op){int Out=op;return Out;}
+
 	
 	/*Take in the double and move it around to the proper functions.*/
 	// combines the strings with the right number of zeros and the decimals

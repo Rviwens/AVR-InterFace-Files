@@ -20,7 +20,7 @@
  //TCCR1B(|ICNC1|ICES1|–|WGM13|WGM12|CS12|CS11|CS10|)
  
  
- int Timer0( int Prescaler,int Register, int Out, int wgm3, int wgm2, int wgm1){
+void Timer0( int Prescaler,int Register, int Out, int wgm3, int wgm2, int wgm1){
 TCCR0A |=(wgm1<<WGM00)|(wgm2<<WGM01);
 TCCR0B |=(wgm3<<WGM02);
  if(Register==0){
@@ -64,7 +64,7 @@ void T0CompB(int ocr0AasTOP, int ocr0BasComp){
 
 
 
- int Timer1( int Prescaler,int Register, int Out, int wgm13, int wgm12, int wgm11, int wgm10){
+void Timer1( int Prescaler,int Register, int Out, int wgm13, int wgm12, int wgm11, int wgm10){
 TCCR1A |=(wgm10<<WGM10)|(wgm11<<WGM11);
 TCCR1B |=(wgm12<<WGM12)|(wgm13<<WGM13);
 if(Register==0){	
@@ -108,9 +108,10 @@ void T1CompB(int ocr0AasTOP, int ocr0BasComp){
 
 
 
- int PWM0(double Vin, double VOUT,int polarity,int INPUT,int Reg){
+ void PWM0(double Vin, double VOUT,int polarity,int INPUT,int Reg){
 unsigned char duty;
 unsigned int ocr=0;
+
 if(INPUT==0){
 if(polarity==1)
 {
@@ -136,7 +137,7 @@ OCR0B=ocr;
 
 
 
-int PWM1(double Vin, double VOUT,int polarity,int INPUT,int Reg, short bitSize){
+void PWM1(double Vin, double VOUT,int polarity,int INPUT,int Reg, short bitSize){
 	unsigned int duty;
 	unsigned int ocr=0;
 	if(INPUT==0){
@@ -163,7 +164,7 @@ int PWM1(double Vin, double VOUT,int polarity,int INPUT,int Reg, short bitSize){
 
 
 
-int Timer2( int Prescaler,short Register, short Out, int wgm12, int wgm11, int wgm10, int ocr2 ){
+void Timer2( int Prescaler,short Register, short Out, int wgm12, int wgm11, int wgm10, int ocr2 ){
 	TCCR2A |=(wgm10<<WGM20)|(wgm11<<WGM21);
 	TCCR2B |=(wgm12<<WGM22);
 
