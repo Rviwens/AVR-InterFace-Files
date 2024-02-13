@@ -33,7 +33,7 @@ I2C_Write(0);			/* Write 0 address for second */
 	
 }
 
-void RTC_Read_Clock(char*str[])
+void RTC_Read_Clock(char *str)
 {
 
 	I2C_Start(Device_Write_address);/* Start I2C communication with RTC */
@@ -75,7 +75,7 @@ void RTC_Calendar_Write(char _day, char _date, char _month, char _year)
 
 
 
-void RTC_Read_Calendar(char*str[])
+void RTC_Read_Calendar(char*str)
 {
 	I2C_Start(Device_Write_address);
 	I2C_Write(3);

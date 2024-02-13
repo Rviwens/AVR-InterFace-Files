@@ -1,4 +1,4 @@
-
+#define F_CPU 20000000UL
 #include <avr/io.h>
 #include <util/delay.h>
 #include <stdio.h>
@@ -16,9 +16,7 @@
 static int Device_Mode; 
 void SPI_MAST_Init(int dataOrder,int Prescaler,int clockPolarity, int Cphase, int DoubleTime){
 Device_Mode=0;
-DDRB&=~(1<<PB6);
-DDRB|=(1<<PB5);
-DDRB|=(1<<PB4);DDRB|=(1<<PB7);
+DDRB|=(1<<PB5)|(1<<PB4)|(1<<PB7)|(1<<PB6);
 SPSR=(DoubleTime<<SPI2X);	
 SPCR=0x00;
 SPCR|=(dataOrder<<DORD);		
@@ -98,11 +96,17 @@ char SPI_SR()			/* SPI Receive data function */
 
 
 #if defined(SPITX)
+
 uint8_t SPI_transfer(uint8_t data)
 {
+	// load data into register
 	SPDR = data;
-	while(!(SPSR & (1<<SPIF)));	/* Wait till reception complete */
-	return(SPDR);
+
+	// Wait for transmission complete
+	while(!(SPSR & (1 << SPIF)));
+
+	// return SPDR
+	return SPDR;
 }
 #endif
 
@@ -128,7 +132,7 @@ uint8_t SPI_transfer(uint8_t data)
 // 	{
 // 		buffer[i]=SPI_SR();
 // 		//USART_TxChar(buffer[i]);
-// 	}// }
+// 	}// }
 
 // void SPI_Read(char *buffer){
 // 	//PORTB&=~(1<<SS);
@@ -160,7 +164,6 @@ uint8_t SPI_transfer(uint8_t data)
 //USART_Send(temp);
 // }
 // 
-
 
 
 

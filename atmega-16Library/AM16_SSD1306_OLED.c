@@ -41,7 +41,7 @@
 #define SSD1306_NOP 0xE3
 #define OLED_Write_Address 0x3C
 
-
+void OLED_Clear();
 
 
 
@@ -118,7 +118,7 @@ void OLED_SetCursor(uint8_t myLineNumber,uint8_t myColumnPosition) {
 }
 
 
-void OLED_Clear() {	
+ void OLED_Clear() {	
 
 
 I2C_Start_NORETURN(0x78);

@@ -12,7 +12,6 @@
 
 
 
-
 #define CMD_VER(X)          ((X >> 4) & 0xF0)
 #define VOL_ACC(X)          (X & 0x1F)
 
@@ -65,7 +64,7 @@ void SD_printR7(uint8_t *res)
 
 	if(res[0] > 1) return;
 
-   //  USART_Send("Hello");
+  
 
 	USART_Send("\r\n\t Voltage : ");
 	if(VOL_ACC(res[3]) == VOLTAGE_ACC_27_33)
