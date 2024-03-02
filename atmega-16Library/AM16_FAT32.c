@@ -7,10 +7,14 @@
 #include <math.h>
 #include <string.h>
 
+#define ReseveClust  500
+
+
+
+
 
 // For reading and writing files in FAT32
 #if defined(FAT32)
-
 // Init vars
 
 long RootDirSec;
@@ -24,9 +28,13 @@ uint32_t FirstClustAddr;
 
 
 
+
 // Find FAT32 Root Directory
-char FAT32_Init(uint8_t  returnVar){
+uint16_t FAT32_Init(uint8_t  returnVar){
+	
 	SD_RSB(DataBuff,0);
+	if(DataBuff[511]==0xaa && DataBuff[510] == 0x55){
+	
 	SecsPerClust =(DataBuff[13]);
 	FATStartSec= (DataBuff[15]*256+DataBuff[14]);
 	FatSecs = (((DataBuff[38]*65536) + ((unsigned) DataBuff[37]*256) + (DataBuff[36])) *DataBuff[16]);
@@ -36,74 +44,89 @@ char FAT32_Init(uint8_t  returnVar){
 	
 switch (returnVar)
 {
-	case 1: return SecsPerClust;
-	break;
-		case 2: return FATStartSec;
+		case 1: return SecsPerClust;
 		break;
-			case 3: return FatSecs;
+			case 2: return FATStartSec;
 			break;
-				case 4: return RootDirSec;
+				case 3: return FatSecs;
 				break;
-					case 5: return BytesPerSec;
-				
+					case 4: return RootDirSec;
+					break;
+						case 5: return BytesPerSec;			
 }
-	
-	
-	
-	
-USART_Send("\r\n Secs Per Clust = ");
-USART_Long_Str(SecsPerClust,0);
-USART_Send("\r\n FAT Start Sec = ");
-USART_Long_Str(FATStartSec,0);
-USART_Send("\r\n FATSecs = ");
-USART_Long_Str(FatSecs,0);
-USART_Send("\r\n RootDir = ");
-USART_Long_Str(RootDirSec,0);
-USART_Send("\r\n Bytes Per Sec = ");
-USART_Long_Str(BytesPerSec,0);
-USART_Send("\r\n");
-	
-	return 1;
+
+} 
+
+
+
+// USART_Send("\r\n Secs Per Clust = ");
+// USART_Long_Str(SecsPerClust,0);
+// USART_Send("\r\n FAT Start Sec = ");
+// USART_Long_Str(FATStartSec,0);
+// USART_Send("\r\n FATSecs = ");
+// USART_Long_Str(FatSecs,0);
+// USART_Send("\r\n RootDir = ");
+// USART_Long_Str(RootDirSec,0);
+// USART_Send("\r\n Bytes Per Sec = ");
+// USART_Long_Str(BytesPerSec,0);
+// USART_Send("\r\n");
+
+return 0;
 }
+
+
+
 
 
 
 //Find File location if Root Directory and First Data cluster of file
-void FAT32_Open_File(char str[]){
+
+
+char FAT32_FILE_Open(char str[]){
 	static uint16_t locX;
 	static uint16_t locI;
 	short flag=1;
 
-	for (int i=0; i<0xFFFF; i++){
+	for (int i=0; i<0xFF; i++){
 		SD_RSB(DataBuff,RootDirSec+i);
-		for(uint16_t x=0; x<= 511; x++){
-			flag=1;
-			if(DataBuff[x]==str[0]){
-				for(int y=0; y <strlen(str); y++)
-				if (DataBuff[x+y]!=str[0+y])flag=0;
+
+		
+		for(uint16_t x=0; x<= 511-32; x++){
+			flag=1;			
+			if(DataBuff[x]==str[0]){							
+				for(int y=0; y <strlen(str); y++)					
+				if (DataBuff[x+y]!=str[0+y])flag=0;				
 				if(flag!=0){
-					USART_Send("\r\n Found\r\n");
 					locX=x;
 					locI=i;
 					flag =2;
-					break;
+					break;									
 				}if(flag==2)break;
 			}if(flag==2)break;
 		}if(flag==2)break;
+		
+flag=0;
 	}
-	if(flag !=0){
+
+	if(flag ==2){
 		//Attr=DataBuff[locX+0x0B];
 		FirstClustAddr = (65536*(DataBuff[locX+0x15])) + (4096*(DataBuff[locX+0x14]))+(256*(DataBuff[locX+0x1B]))+(DataBuff[locX+0x1a]);
-
-
-
+return 0;
 	}
+
+return 1;
 }
 
 
 
-void FAT32_Read_File(char str[]){
-	FAT32_Open_File(str);
+
+
+
+
+char FAT32_FILE_Read(char str[]){
+	
+	if(	FAT32_FILE_Open(str) ==0){
+
 	uint32_t CurrentClust = FirstClustAddr;
 
 	// FAT32[First Data Cluster]--> Next Data Cluster of Data;
@@ -123,10 +146,12 @@ void FAT32_Read_File(char str[]){
 		SD_RSB(DataBuff,FATStartSec+((int)CurrentClust/128));
 		long long AddrData =(DataBuff[(0)+(CurrentClust*4) - ConstMin]+(DataBuff[(1)+(CurrentClust*4)- ConstMin]*256)+(DataBuff[(2)+(CurrentClust*4)- ConstMin]*65536)+(DataBuff[(3)+(CurrentClust*4)- ConstMin]*16777216));
 		CurrentClust = (AddrData&0b1111111);
-		if(AddrData== 0xffefff8){break;} // If not working check ending flag. I set this for the file I was working on and might nbot be right.
+		if(AddrData>= 0xFFeFFFF8){break;} // If not working check ending flag. I set this for the file I was working on and might nbot be right.
 	}
+	return 0;
 }
-
+return 1;
+	}
 
 
 
@@ -142,8 +167,8 @@ void ClearClust(uint32_t ClustAddr){
 
 
 
-void FAT32_Delete_File_Contents(char str[]){
-	FAT32_Open_File(str);
+char FAT32_FILE_Delete_Contents(char str[]){
+	if(	FAT32_FILE_Open(str) ==0){
 	uint32_t CurrentClust = FirstClustAddr;	//
 
 	while(FirstClustAddr!=0){
@@ -157,15 +182,20 @@ void FAT32_Delete_File_Contents(char str[]){
 		long long AddrData =(DataBuff[(0)+(CurrentClust*4) - ConstMin]+(DataBuff[(1)+(CurrentClust*4)- ConstMin]*256)+(DataBuff[(2)+(CurrentClust*4)- ConstMin]*65536)+(DataBuff[(3)+(CurrentClust*4)- ConstMin]*16777216));
 		CurrentClust = (AddrData&0b1111111);
 
-		if(AddrData== 0xffefff8||AddrData== 0x0)break; // If not working check ending flag. I set this for the file I was working on and might nbot be right.
+		if(AddrData>= 0xffffff8||AddrData== 0x0)break; // If not working check ending flag. I set this for the file I was working on and might nbot be right.
+		
 		USART_Send("\r\n Clearing Cluster:");
 		USART_Long_Str(CurrentClust,0);
 	}
+	
+	return 0;
+}
+return 1;
+
 }
 
-
-void FAT32_Clear_From_FAT(char str[]){
-	FAT32_Open_File(str);
+char FAT32_Clear_From_FAT(char str[]){
+	if(	FAT32_FILE_Open(str) ==0){
 	uint32_t CurrentClust = FirstClustAddr;
 
 	while(1){
@@ -182,15 +212,17 @@ void FAT32_Clear_From_FAT(char str[]){
 		SD_WSB(DataBuff,FATStartSec+((int)CurrentClust/128));
 
 		CurrentClust = (AddrData&0b1111111);
-		if(AddrData== 0xffefff8||AddrData==0x0)break;
+		if(AddrData>= 0xFFeFFFF8||AddrData==0x0)break;
 
 	}
+	return 0;
+}
+return 1;
 }
 
 
 
-
-void FAT32_Clear_From_Dir(char str[]){
+char FAT32_Clear_From_Dir(char str[]){
 	static uint16_t locX;
 	static uint16_t locI;
 	short flag=1;
@@ -204,7 +236,7 @@ void FAT32_Clear_From_Dir(char str[]){
 				for(int y=0; y <strlen(str); y++)
 				if (DataBuff[x+y]!=str[0+y])flag=0;
 				if(flag!=0){
-					USART_Send("\r\n Found\r\n");
+					//USART_Send("\r\n Found\r\n");
 					locX=x;
 					locI=i;
 					flag =2;
@@ -220,11 +252,12 @@ void FAT32_Clear_From_Dir(char str[]){
 		SD_RSB(DataBuff,RootDirSec+locI);
 		DataBuff[locX]=0xe5;
 		SD_WSB(DataBuff,RootDirSec+locI);
-	}
+		return 0;
+	} else return 1;
 }
 
-void FAT32_Delete_File(char str[]){
-	FAT32_Delete_File_Contents(str);
+void FAT32_FILE_Delete(char str[]){
+	FAT32_FILE_Delete_Contents(str);
 	_delay_ms(100);
 	FAT32_Clear_From_FAT(str);
 	_delay_ms(100);
@@ -256,10 +289,10 @@ void FAT32_Update_FAT(long Clust){
 	Clust *=4;
 	long ConstMin = 128*(int)(Clust/128);
 	SD_RSB(DataBuff,FATStartSec+((int)Clust/128));
-	DataBuff[Clust-ConstMin]=0xff;
-	DataBuff[Clust-ConstMin+1]=0xef;
+	DataBuff[Clust-ConstMin]=0xf8;
+	DataBuff[Clust-ConstMin+1]=0xFf;
 	DataBuff[Clust-ConstMin+2]=0xff;
-	DataBuff[Clust-ConstMin+3]=0xf8;
+	DataBuff[Clust-ConstMin+3]=0xfF;
 	SD_WSB(DataBuff,FATStartSec+((int)Clust/128));
 	
 }
@@ -267,7 +300,7 @@ void FAT32_Update_FAT(long Clust){
 
 
 
-void FAT32_Create_File(char str[],char type[], char tempstr[]){
+void FAT32_FILE_Create(char str[],char type[], char tempstr[]){
 
 
 	uint16_t Count=4;
@@ -297,28 +330,24 @@ void FAT32_Create_File(char str[],char type[], char tempstr[]){
 
 	//Attr
 	DataBuff[Addr+11]=0x20;
+	
 	//Upper Case or lowercase
 	DataBuff[Addr+12]=0x00;
 
+
 	//Date created
-
-
-
-
-
-
 uint16_t temp =   ( (0b1111111&((2000+tempstr[7])-1980))<<9) + ((0b1111&tempstr[6])<<5) + (0b11111&tempstr[5]);
 	DataBuff[Addr+16]=  temp & 0xFF;
 	DataBuff[Addr+17]= (temp>>8);
 
 
 // convert to military time 
-
-if(temp[2]>12)temp[2]+=12;	
+if(tempstr[2]>12) tempstr[2]+=12 ;	
 temp =	((0b11111&tempstr[2])<<12) + ((0b111111&tempstr[1])<<6) + (0b111111&tempstr[0]);
 	DataBuff[Addr+13]= temp&0b1;
 	DataBuff[Addr+14]=  (temp>>1)&0xFF;
 	DataBuff[Addr+15]= (temp>>9);
+
 
 
 	// Declare Size
@@ -344,33 +373,110 @@ temp =	((0b11111&tempstr[2])<<12) + ((0b111111&tempstr[1])<<6) + (0b111111&temps
 	USART_Send("\r\n Free Clust at =");
 	USART_Long_Str(out,0);
 
-	//FAT32_Update_FAT(out);
+	FAT32_Update_FAT(out);
+}
+
+
+
+
+	
+uint8_t FAT32_FILE_Read_Sector_In_Cluster(char str[], long Clust,uint8_t Sect){
+	
+	if(Sect<32){
+	if(	FAT32_FILE_Open(str) ==0){
+	uint32_t CurrentClust = FirstClustAddr;
+
+char TempCount=0;
+long long AddrData =0; 
+
+	while(TempCount<= Clust && AddrData>=0xFFeFFFF8){
+		
+		
+		long ConstMin = 128*(int)(CurrentClust/128);
+		SD_RSB(DataBuff,FATStartSec+((int)CurrentClust/128));
+		
+	    AddrData =(DataBuff[(0)+(CurrentClust*4) - ConstMin]+(DataBuff[(1)+(CurrentClust*4)- ConstMin]*256)+(DataBuff[(2)+(CurrentClust*4)- ConstMin]*65536)+(DataBuff[(3)+(CurrentClust*4)- ConstMin]*16777216));
+		CurrentClust = (AddrData&0b1111111);
+		TempCount++;
+		
+	}
+		
+		
+if(TempCount<Clust){memset(DataBuff,0xFF,512); return 2;}// Cluster Dose not exist
+	
+ SD_RSB(DataBuff,(RootDirSec+(32*(CurrentClust-2))+Sect));	
+return 0; // Complete With No errors 
 	
 }
-
-void FAT32_Append_Sector(char str[]){
-	FAT32_Open_File(str);
-	USART_Send("\r\n ClustAddr =");
-	USART_Long_Str(FirstClustAddr,0);
-	USART_Send("\r\n ClustAddr at =");
-	USART_Long_Str(RootDirSec+(32*(FirstClustAddr-2)),0);
-	memset(DataBuff,0,512);
-	DataBuff[0]=0x45;
-	DataBuff[1]=0x35;
-	DataBuff[2]=0x42;
-	DataBuff[3]=0x23;
-	DataBuff[4]=0x52;
-	DataBuff[5]=0x49;
-	SD_WSB(DataBuff,RootDirSec+(32*(FirstClustAddr-2)));
+return 1; // File Dose not Exist 
+	}
+return 3; // Sector Called Outside Cluster Size (Over Sectors Per Clust)
 }
 
-void FAT32_Read_Sector_In_Cluster(long Clust,uint8_t Sect){
-	SD_RSB(DataBuff,(RootDirSec+(32*(Clust-2))+Sect));
 
-	USART_Send("\r\n");
-// 	for(int t = 0; t<512; t++)
-// 	USART_Int_StrHEXRAW(DataBuff[t],0);
 
+
+
+
+
+char FAT32_FILE_Write_Sector_In_Cluster(char str[], long Clust,uint8_t Sect){
+
+		SD_WSB(DataBuff,(RootDirSec+(32*(ReseveClust-2))+Sect));
+	
+	if(Sect<32){	
+	if(	FAT32_FILE_Open(str) ==0 || Sect <32){
+		
+	uint32_t CurrentClust = FirstClustAddr;
+	char TempCount=0;
+
+
+long long AddrData =0;
+
+	while(TempCount<= Clust && AddrData>=0xFFeFFFF8){
+		long ConstMin = 128*(int)(CurrentClust/128);
+		
+
+		SD_RSB(DataBuff,FATStartSec+((int)CurrentClust/128));
+		AddrData =(DataBuff[(0)+(CurrentClust*4) - ConstMin]+(DataBuff[(1)+(CurrentClust*4)- ConstMin]*256)+(DataBuff[(2)+(CurrentClust*4)- ConstMin]*65536)+(DataBuff[(3)+(CurrentClust*4)- ConstMin]*16777216));
+		CurrentClust = (AddrData&0b1111111);
+		TempCount++;
+
+	}
+	
+	if(TempCount<Clust){memset(DataBuff,0xFF,512);   return 2; }// Cluster Dose not exist
+
+	SD_RSB(DataBuff,(RootDirSec+(32*(ReseveClust-2))+Sect));
+	SD_WSB(DataBuff,(RootDirSec+(32*(CurrentClust-2))+Sect));
+	
+	return 0; // Complete With No errors 
+	
 }
+return 1; // File Dose not Exist 
+	}
+return 3; // Sector Called Outside Cluster Size (Over Sectors Per Clust)
+	}
+
+
+
+
+
+
+
+
+
+char CreateNewClust(){
+	
+USART_Send("\r\n Next Open Clust=");
+USART_Int_Str(FAT32_RETURNING_NEXT_OPEN_CLUST(),0);
+	
+	
+	return 1;
+}
+
+
+
+
+
+
 
 #endif
