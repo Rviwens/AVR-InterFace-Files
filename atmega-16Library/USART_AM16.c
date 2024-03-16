@@ -90,7 +90,7 @@ void USART_Int_Str(int I, int ES){
 itoa(I,NUM_Hold,10);
 USART_Send_ESS(NUM_Hold,ES);
 }
-void USART_Int_StrBIT(int I, int ES){
+void USART_Int_StrBIN(int I, int ES){
 	itoa(I,NUM_Hold,2);
 	USART_Send_ESS(NUM_Hold,ES);
 }
@@ -113,6 +113,10 @@ void USART_Long_Str(long I, int ES){
 }
 void USART_Long_StrHEX(long I, int ES){
 	ltoa(I,NUM_Hold,16);
+	USART_Send_ESS(NUM_Hold,ES);
+}
+void USART_Long_StrBIN(long I, int ES){
+	ltoa(I,NUM_Hold,2);
 	USART_Send_ESS(NUM_Hold,ES);
 }
 #endif

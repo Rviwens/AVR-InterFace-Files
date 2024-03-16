@@ -201,7 +201,7 @@ uint8_t SD_sendOpCond()
 
 
 #if defined(USARTSD)
-void SD_initREAD(){
+void SD_InitRead(){
 	SD_powerUpSeq();
 	uint8_t res[5];
 	USART_Send("Sending CMD0: \r\n");
@@ -234,6 +234,15 @@ void SD_initREAD(){
 	SD_readOCR(res);
 	USART_Send("Response: \r\n");
 	SD_printR3(res);
+	
+// 		USART_Send("Changing BLOCKLEN \r\n");
+// 		SD_Command(16,,0);
+// 		res[0]= SD_readRes1();
+// 		USART_Send("Response: \r\n");
+// 		SD_printR1(res[0]);
+	
+	
+	
 }
 #endif
 
@@ -290,6 +299,9 @@ uint8_t SD_Init(){
 	// read OCR
 	SD_readOCR(res);
 
+
+
+
 	// check card is ready
 	if(!(res[1] & 0x80)) return 4;
 
@@ -323,7 +335,7 @@ _delay_ms(3);
 	memset(buf,0,DataBuffSize);
 	uint8_t res1, read;
 	uint16_t readAttempts;
-
+    read =0; 
 	// set token to none
 
 	// assert chip select
@@ -363,6 +375,7 @@ _delay_ms(3);
 	SPI_transfer(0xFF);
 	CS_DE;
 	SPI_transfer(0xFF);
+
 
 	return res1;
 }
