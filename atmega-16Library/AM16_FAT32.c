@@ -449,10 +449,12 @@ uint32_t AddrData=0;
 while(FirstClustAddr!=0){
 	
 /*	long loc = RootDirSec+(32*(CurrentClust-2));*/
-	uint32_t ConstMin = 512*(int)(CurrentClust/128);
+
+	uint32_t OverFlow = ((int)CurrentClust/128);
+	uint32_t ConstMin = 512*OverFlow;
 	
-	
-	SD_RSB(DataBuff,FATStartSec+((int)CurrentClust/128));
+		
+	    SD_RSB(DataBuff,FATStartSec+OverFlow);
 
 	
 	AddrData = (DataBuff[(0)+(CurrentClust*4) - ConstMin]);
@@ -468,10 +470,12 @@ while(FirstClustAddr!=0){
 
 	CurrentClust = (AddrData&0b1111111);
 	
-	
+
 }
 USART_Send("\r\n Location of las clust = ");
 USART_Int_Str(CurrentClust,0);
+
+
 if(AddrData== 0x0)return 2; else return CurrentClust; 
 
 }
@@ -505,9 +509,7 @@ uint32_t OverFlow = (int)(OriginalLastCl/128);
  uint32_t ConstMin = 512*OverFlow;
  
  
- USART_Send("\r\n OverFlow");
- USART_Int_Str(OverFlow,0);
- OriginalLastCl *=4;
+
 
  
  SD_RSB(DataBuff,FATStartSec+OverFlow);
@@ -521,6 +523,8 @@ uint32_t OverFlow = (int)(OriginalLastCl/128);
 } else return 1; 
 return 2;
 }
+
+
 
 
 
