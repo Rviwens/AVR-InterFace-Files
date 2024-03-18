@@ -7,19 +7,21 @@
 #include <math.h>
 #include <string.h>
 
-char StatusBuff[511];
+
+uint8_t DataBuff[511];
+
 
 #define USARTTX
-#define USARTRX
 #define SPITX
 #define SPIMast
 #define FAT32
 #define SDRSB
 #define SDWSB
-
+#define RTC 
+//#define USARTSD
 
 char token;
-long RDS;
+
 
 
 
