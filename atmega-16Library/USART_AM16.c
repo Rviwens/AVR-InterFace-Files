@@ -31,24 +31,24 @@ ISR(TIMER2_COMP_vect){PORTD^=(1<<FequncyPin); }
 static long BAUD;
 void USART_init(int parity, int bitsize, long baud)
 {
- BAUD=baud;
-#define BDC ((F_CPU/16/BAUD)-1)
-UCSRB |= (1 << RXEN) | (1 << TXEN)|(1<<RXCIE);/* Turn on transmission and reception */
-switch(parity){
-case 0: UCSRC&=~(1<<UPM0); UCSRC&=~(1<<UPM1);break;
-case 1:  UCSRC|=(1<<UPM0)|(1<<UPM1);break;
-case 2:	 UCSRC|=(1<<UPM1); break;
-}
-switch(bitsize){
-	case 5: UCSRC&=~(1<<UCSZ0); UCSRC&=~(1<<UCSZ1); UCSRC&=~(1<<UCSZ2);break;
-	case 6:  UCSRC|=(1<<UCSZ0);break;
-	case 7:	 UCSRC|=(1<<UCSZ1); break;
-	case 8: UCSRC|=(1<<UCSZ1);UCSRC|=(1<<UCSZ0); break;
-	case 9:  UCSRC|=(1<<UCSZ0)|(1<<UCSZ1)|(1<<UCSZ2);break;
-}
+	BAUD=baud;
+	#define BDC ((F_CPU/16/BAUD)-1)
+	UCSRB |= (1 << RXEN) | (1 << TXEN)|(1<<RXCIE);/* Turn on transmission and reception */
+	switch(parity){
+		case 0: UCSRC&=~(1<<UPM0); UCSRC&=~(1<<UPM1);break;
+		case 1:  UCSRC|=(1<<UPM0)|(1<<UPM1);break;
+		case 2:	 UCSRC|=(1<<UPM1); break;
+	}
+	switch(bitsize){
+		case 5: UCSRC&=~(1<<UCSZ0); UCSRC&=~(1<<UCSZ1); UCSRC&=~(1<<UCSZ2);break;
+		case 6:  UCSRC|=(1<<UCSZ0);break;
+		case 7:	 UCSRC|=(1<<UCSZ1); break;
+		case 8: UCSRC|=(1<<UCSZ1);UCSRC|=(1<<UCSZ0); break;
+		case 9:  UCSRC|=(1<<UCSZ0)|(1<<UCSZ1)|(1<<UCSZ2);break;
+	}
 
-UBRRL = BDC;		/* Load lower 8-bits of the baud rate value */
-UBRRH = (BDC >> 8);	/* Load upper 8-bits*/
+	UBRRL = BDC;		/* Load lower 8-bits of the baud rate value */
+	UBRRH = (BDC >> 8);	/* Load upper 8-bits*/
 }
 void T(){if(BAUD<=9000){_delay_ms(1);}if(BAUD<=5000){_delay_ms(9);}if(BAUD<=1200){_delay_ms(50);}}
 
@@ -61,15 +61,15 @@ void T(){if(BAUD<=9000){_delay_ms(1);}if(BAUD<=5000){_delay_ms(9);}if(BAUD<=1200
 
 #if defined(USARTTX)
 void USART_TxChar(char ch){
-while(!(UCSRA & (1<<UDRE)));	/* Wait for empty transmit buffer*/
-UDR=ch;
+	while(!(UCSRA & (1<<UDRE)));	/* Wait for empty transmit buffer*/
+	UDR=ch;
 }
 
-void USART_Send(char str[]){	
-for(int i=0;str[i]!='\0'; i++){
-USART_TxChar(str[i]);	
-T();
-}
+void USART_Send(char str[]){
+	for(int i=0;str[i]!='\0'; i++){
+		USART_TxChar(str[i]);
+		T();
+	}
 }
 
 void USART_Send_ESS(char str[],int ES){
@@ -87,8 +87,8 @@ void USART_Send_ESS(char str[],int ES){
 
 char NUM_Hold[20];
 void USART_Int_Str(int I, int ES){
-itoa(I,NUM_Hold,10);
-USART_Send_ESS(NUM_Hold,ES);
+	itoa(I,NUM_Hold,10);
+	USART_Send_ESS(NUM_Hold,ES);
 }
 void USART_Int_StrBIN(int I, int ES){
 	itoa(I,NUM_Hold,2);
@@ -100,10 +100,10 @@ void USART_Int_StrHEX(int I, int ES){
 	USART_Send_ESS(NUM_Hold,ES);
 }
 
-	void USART_Int_StrHEXRAW(int I, int ES){
-		itoa(I,NUM_Hold,16);
-		if (I ==0 || I<=0xF) USART_Send_ESS("0",0);
-		USART_Send_ESS(NUM_Hold,ES);
+void USART_Int_StrHEXRAW(int I, int ES){
+	itoa(I,NUM_Hold,16);
+	if (I ==0 || I<=0xF) USART_Send_ESS("0",0);
+	USART_Send_ESS(NUM_Hold,ES);
 
 }
 
@@ -133,7 +133,7 @@ void USART_Long_StrBIN(long I, int ES){
 
 #if defined(USARTRX)
 unsigned char RxSerialBuffer[Buffer_Size];
-int RXSBWP; 
+int RXSBWP;
 unsigned char RXSB[Buffer_Size];
 
 void CheckRx(){
@@ -145,12 +145,12 @@ void CheckRx(){
 		memset(RxSerialBuffer,0,Buffer_Size);
 	}}
 
-ISR(USART_RXC_vect){ 	
-RXSBWP++;
-RxSerialBuffer[RXSBWP]=UDR; 
-CheckRx();
-if(RXSBWP>=Buffer_Size){RXSBWP=0;}}
-#endif
+	ISR(USART_RXC_vect){
+		RXSBWP++;
+		RxSerialBuffer[RXSBWP]=UDR;
+		CheckRx();
+		if(RXSBWP>=Buffer_Size){RXSBWP=0;}}
+		#endif
 
 
 
@@ -164,24 +164,24 @@ if(RXSBWP>=Buffer_Size){RXSBWP=0;}}
 
 
 
-#if defined(QuickUSART)
-void USART_END(){
-_delay_ms(10);
-UCSRB=0x00;
-UBRRL=0x00;
-UBRRH=0x00;
-}
+		#if defined(QuickUSART)
+		void USART_END(){
+			_delay_ms(10);
+			UCSRB=0x00;
+			UBRRL=0x00;
+			UBRRH=0x00;
+		}
 
-void USART_SSE(int baudRate, char *data,short Ebit){
-USART_init(0,8,baudRate);
-//USART_Send_ESS(data,Ebit);
-USART_END();	
-USART_Send_ESS(data,Ebit);
-}
+		void USART_SSE(int baudRate, char *data,short Ebit){
+			USART_init(0,8,baudRate);
+			//USART_Send_ESS(data,Ebit);
+			USART_END();
+			USART_Send_ESS(data,Ebit);
+		}
 
-void USART_SSIE(int baudRate, int data,short Ebit){
-	USART_init(0,8,baudRate);
-	USART_Int_Str(data,Ebit);
-	USART_END();
-}
-#endif
+		void USART_SSIE(int baudRate, int data,short Ebit){
+			USART_init(0,8,baudRate);
+			USART_Int_Str(data,Ebit);
+			USART_END();
+		}
+		#endif

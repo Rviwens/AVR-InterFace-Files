@@ -33,7 +33,7 @@ I2C_Write(0);			/* Write 0 address for second */
 	
 }
 
-void RTC_Read_Clock(char *str)
+void RTC_Clock_Read(char *str)
 {
 
 	I2C_Start(Device_Write_address);/* Start I2C communication with RTC */
@@ -58,7 +58,7 @@ void RTC_Read_Clock(char *str)
 	str[3]=AMPM;
 }
 
-void RTC_Calendar_Write(char _day, char _date, char _month, char _year)
+void RTC_Write_Calendar(char _day, char _date, char _month, char _year)
 {
 	_date= ((int)((_date/10)<<4))|(_date-((int)(_date/10)*10));
 	_month= ((int)((_month/10)<<4))|(_month-((int)(_month/10)*10));
@@ -75,7 +75,7 @@ void RTC_Calendar_Write(char _day, char _date, char _month, char _year)
 
 
 
-void RTC_Read_Calendar(char*str)
+void RTC_Calendar_Read(char*str)
 {
 	I2C_Start(Device_Write_address);
 	I2C_Write(3);

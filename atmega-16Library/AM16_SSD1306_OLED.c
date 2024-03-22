@@ -263,7 +263,7 @@ void OLED_Byte_READ(uint8_t x, uint8_t y, uint8_t *ScreenBuffer){
 		
 uint8_t OUT =ScreenBuffer[((128*Page)+x)];
 USART_Send("\r\n ScreenBuffer= ");
-USART_Int_StrBIT(OUT,0);
+USART_Int_StrBIN(OUT,0);
 uint8_t dataRead=0;
 USART_Send("\r\n Data = ");
 if(OUT&0b1){dataRead+=1;}
@@ -274,7 +274,7 @@ if(OUT&0b10000){dataRead+=4;}
 if(OUT&0b100000){dataRead+=64;}
 if(OUT&0b1000000){dataRead+=8;}
 if(OUT&0b10000000){dataRead+=128;}
-USART_Int_StrBIT(dataRead,0);
+USART_Int_StrBIN(dataRead,0);
 USART_Send("\r\n Address= ");
 USART_Int_Str(INDEX,0);
 // USART_Send("\r\n temp= ");

@@ -7,15 +7,30 @@
 #include <math.h>
 #include <string.h>
 
-#define FNAME "1360CHR"
-#define StrLen 7
+#define FNAME "1306CHR"
 
-void FindChar(uint8_t chr){
-
-uint16_t loc = (chr*7)+0x20;
-char Overflow = (int)loc/512;
-// Create A ConstMin for loc
-
-FAT32_FILE_Read_Sector_In_Cluster("FNAME",0,Overflow);	
+void SendChar(uint8_t chr){
+//	uint16_t loc = ((int)chr-0x20)*5;
+	FAT32_FILE_Read_Sector_In_Cluster(FNAME,0,0);
+// DataBuff[loc];
+// DataBuff[loc+1];	
+// DataBuff[loc+2];	
+// DataBuff[loc+3];
+// DataBuff[loc+4];	
 }
 
+
+
+
+void DisplayChrFile(){
+	char flagB= FAT32_FILE_Read_Sector_In_Cluster(FNAME,0,0);
+	USART_Send("\r\n");
+	if (flagB==0){
+		USART_Send("\r\n");
+		for(short i =0; i<512;i++)
+			USART_Int_StrHEXRAW(DataBuff[i],0);
+	}else{
+		USART_Send("\r\n FlagB =");
+		USART_Int_Str(flagB,0);
+	}
+}

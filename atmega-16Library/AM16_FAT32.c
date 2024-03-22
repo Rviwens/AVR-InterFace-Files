@@ -69,12 +69,17 @@ LBA += (long)(DataBuff[446+(16*partionNUM)-5]* 16777216);
 	BytesPerSec= (DataBuff[12]*256+DataBuff[11]);
 	}
 
+
+// RootDirSec=40960;
+// BytesPerSec=512;
+// FATStartSec =11470;
+// SecsPerClust=32;
 // USART_Send("\r\n Secs Per Clust = ");
 // USART_Long_Str(SecsPerClust,0);
 // USART_Send("\r\n FAT Start Sec = ");
 // USART_Long_Str(FATStartSec,0);
-// // USART_Send("\r\n FATSecs = ");
-// // USART_Long_Str(FatSecs,0);
+// USART_Send("\r\n FATSecs = ");
+// USART_Long_Str(FatSecs,0);
 // USART_Send("\r\n RootDir = ");
 // USART_Long_Str(RootDirSec,0);
 // USART_Send("\r\n Bytes Per Sec = ");
