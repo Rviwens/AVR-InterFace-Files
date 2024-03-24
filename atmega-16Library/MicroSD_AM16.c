@@ -9,9 +9,9 @@
 
 
 #if defined(USARTSD)
-#define SDPrintRes
-#endif
 #include <SD_RES_OUTPUT.c>
+#endif
+
 
 #define CS_DE PORTA|=(1<<0);
 #define CS_EN PORTA&=~(1<<0);
@@ -329,7 +329,7 @@ uint8_t SD_Init(){
 
 #if defined(SDRSB)
 
-uint8_t SD_RSB( uint8_t *buf,uint32_t addr)
+uint8_t SD_RSB( uint8_t*buf,uint32_t addr)
 {
 _delay_ms(3);
 	memset(buf,0,DataBuffSize);
@@ -399,7 +399,7 @@ _delay_ms(3);
 #if defined(SDWSB)
 void SD_WSB(uint8_t *buf,uint32_t addr)
 {
-	_delay_ms(3);
+	_delay_ms(5);
 	uint32_t readAttempts;
 	uint8_t read;
 	uint8_t res[5];
