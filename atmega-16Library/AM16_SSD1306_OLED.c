@@ -39,20 +39,20 @@
 #define SSD1306_CHARGEPUMP 0x8D
 #define SSD1306_SWITCHCAPVCC 0x2
 #define SSD1306_NOP 0xE3
-#define OLED_Write_Address 0x3C
+#define SSD1306_Write_Address 0x3C
 
-void OLED_Clear();
+void SSD1306_Clear();
 
 
 
- void OLED_Invert(int Mode){
+ void SSD1306_Invert(int Mode){
 	 if( Mode==1){
 	 I2C_Write(SSD1306_INVERTDISPLAY);}
 	 else if(Mode==0){
 	 I2C_Write(SSD1306_NORMALDISPLAY);}
  }
 
- void OLED_Contrast(uint8_t data){
+ void SSD1306_Contrast(uint8_t data){
 	 I2C_Write(SSD1306_SETCONTRAST);
 	 I2C_Write(data);
  }
@@ -60,7 +60,7 @@ void OLED_Clear();
 
 
 
-void OLED_Init(short Invert, uint8_t contrast){
+void SSD1306_Init(short Invert, uint8_t contrast){
 DDRD|=0xF0;
 PORTD|=0xF0;
 _delay_ms(100);
@@ -83,7 +83,7 @@ I2C_Write(SSD1306_SEGREMAP | 0x1);
 I2C_Write(SSD1306_COMSCANDEC);
 I2C_Write(SSD1306_SETCOMPINS);
 I2C_Write(0x12);
-OLED_Contrast(contrast);
+SSD1306_Contrast(contrast);
 I2C_Write(SSD1306_SETPRECHARGE);
 I2C_Write(0xF1);
 I2C_Write(SSD1306_SETVCOMDETECT); 
@@ -92,18 +92,18 @@ I2C_Write(0x40);
 I2C_Write(SSD1306_CHARGEPUMP);
 I2C_Write(0x14);	
 I2C_Write(SSD1306_DISPLAYALLON_RESUME);
-OLED_Invert(Invert);
+SSD1306_Invert(Invert);
 // Turn display back on
 I2C_Write(SSD1306_DISPLAYON);
 //I2C_Stop();
-OLED_Clear();
+SSD1306_Clear();
 } 
 
-uint8_t     OLEDlineNumber = 0, OLEDcursorPos = 0;
-void OLED_SetCursor(uint8_t myLineNumber,uint8_t myColumnPosition) {
+uint8_t     SSD1306lineNumber = 0, SSD1306cursorPos = 0;
+void SSD1306_SetCursor(uint8_t myLineNumber,uint8_t myColumnPosition) {
 	if( (myLineNumber <= 0x07) && (myColumnPosition <= 127) ) {
-		OLEDlineNumber = myLineNumber;     // global var: current line number
-		OLEDcursorPos =  myColumnPosition; // global var: current cursor position
+		SSD1306lineNumber = myLineNumber;     // global var: current line number
+		SSD1306cursorPos =  myColumnPosition; // global var: current cursor position
 
 		I2C_Write(SSD1306_COLUMNADDR);
 		I2C_Write(myColumnPosition);
@@ -118,11 +118,11 @@ void OLED_SetCursor(uint8_t myLineNumber,uint8_t myColumnPosition) {
 }
 
 
- void OLED_Clear() {	
+ void SSD1306_Clear() {	
 
 
 I2C_Start_NORETURN(0x78);
-OLED_SetCursor(0,0);
+SSD1306_SetCursor(0,0);
 
 	// TWI NOT using Wire.h   128 bytes (8 bits vertical) per row * 8 char rows = 1024
 	// Send 64 TWI messages { START:SLAw:0x40:16 bytes of 0x00:STOP }  1024 data bytes total
@@ -139,9 +139,9 @@ OLED_SetCursor(0,0);
 	}
 	}
 
-void OLED_Fill() {
+void SSD1306_Fill() {
 	I2C_Start_NORETURN(0x78);
-	OLED_SetCursor(0,0);
+	SSD1306_SetCursor(0,0);
 
 	// TWI NOT using Wire.h   128 bytes (8 bits vertical) per row * 8 char rows = 1024
 	// Send 64 TWI messages { START:SLAw:0x40:16 bytes of 0x00:STOP }  1024 data bytes total
@@ -161,11 +161,11 @@ void OLED_Fill() {
 
 
 
-void OLED_Display(uint8_t *ScreenBuffer){
-	OLED_Clear();
+void SSD1306_Display(uint8_t *ScreenBuffer){
+	SSD1306_Clear();
 
 	I2C_Start_NORETURN(0x78);
-	OLED_SetCursor(0,0);
+	SSD1306_SetCursor(0,0);
 	I2C_Stop();
 	for (uint16_t ScrIndex=0; ScrIndex<1024; ScrIndex+=0) {  // (SSD1306_LCDWIDTH*SSD1306_LCDHEIGHT/8)
 		I2C_Start_NORETURN(0x78);
@@ -195,19 +195,31 @@ void OLED_Display(uint8_t *ScreenBuffer){
 
 
 
-void OLED_XY_pixel(uint8_t x, uint8_t y, uint8_t *ScreenBuffer, uint8_t PixleStatus){
+void SSD1306_XY_pixel(uint8_t x, uint8_t y, uint8_t *ScreenBuffer, uint8_t PixleStatus){
 	if( (y  <32) && (x <128)){
 		
 		uint8_t Page=0;
 		uint8_t HalfPage=0;
 		uint8_t Shift=0;
 
-		if(y>=0 && y<4){Page=0; Shift=0;HalfPage=0;}else if(y>=4&&y<8){Page=0;Shift=1;HalfPage=1;}else if(y>=8&&y<12){Page=1;Shift=0;HalfPage=2;}
-		else if(y>=12&&y<16){Page=1;Shift=1;HalfPage=3;}else if(y>=16&&y<20){Page=2;Shift=0;HalfPage=4;}else if(y>=20&&y<24){Page=2;Shift=1;HalfPage=5;}
-		else if(y>=24&&y<28){Page=3;Shift=0;HalfPage=6;}else if(y>=28&&y<32){Page=3;Shift=1;HalfPage=7;}
+
+				
+				
+				
+Page=(int)(y/8);
+HalfPage=(int)(y/4);
+ if((y>=4&&y<8)||(y>=12&&y<16)||(y>=20&&y<24)||(y>=28&&y<32))
+ Shift=1;
+				
+				
+				
+				
+			Page=(int)(y/8);
+			HalfPage=(int)(y/4);
+
 		uint8_t temp=0;
 		y-=(4*(HalfPage));
-		temp=(y*64)/32;
+		temp=(y*2);
 		temp+=Shift;
 		int INDEX =((128*Page)+x);
 
@@ -221,39 +233,23 @@ void OLED_XY_pixel(uint8_t x, uint8_t y, uint8_t *ScreenBuffer, uint8_t PixleSta
 		ScreenBuffer[INDEX]&=~(1<<temp);
 	}
 }
-//USART_Send("\r\n ScreenBuffer= ");
-// uint8_t OUT =ScreenBuffer[((128*Page)+x)];
-// USART_Int_StrBIT(OUT,0);
-// USART_Send("\r\n Address= ");
-// USART_Int_Str(INDEX,0);
-// USART_Send("\r\n temp= ");
-// USART_Int_Str(temp,0);
-// USART_Send("\r\n y= ");
-// USART_Int_Str(y,0);
-// USART_Send("\r\n x= ");
-// USART_Int_Str(x,0);
-// USART_Send("\r\n Shift= ");
-// USART_Int_Str(Shift,0);
-// USART_Send("\r\n HalfPage= ");
-// USART_Int_Str(HalfPage,0);
-// USART_Send("\r\n Page= ");
-// USART_Int_Str(Page,0);
-// USART_Send("\r\n ShiftData= ");
-// USART_Int_StrBIT(ScreenBuffer[((128*Page)+x)]>>1,0);
+
 }else return;
 }
 
 
-void OLED_Byte_READ(uint8_t x, uint8_t y, uint8_t *ScreenBuffer){
+void SSD1306_Byte_READ(uint8_t x, uint8_t y, uint8_t *ScreenBuffer){
 	if( (y  <32) && (x <128)){
 		
 		uint8_t Page=0;
 		uint8_t HalfPage=0;
 		uint8_t Shift=0;
+		
+Page=(int)(y/8);
+HalfPage=(int)(y/4);
+if((y>=4&&y<8)||(y>=12&&y<16)||(y>=20&&y<24)||(y>=28&&y<32))
+Shift=1;
 
-		if(y>=0 && y<4){Page=0; Shift=0;HalfPage=0;}else if(y>=4&&y<8){Page=0;Shift=1;HalfPage=1;}else if(y>=8&&y<12){Page=1;Shift=0;HalfPage=2;}
-		else if(y>=12&&y<16){Page=1;Shift=1;HalfPage=3;}else if(y>=16&&y<20){Page=2;Shift=0;HalfPage=4;}else if(y>=20&&y<24){Page=2;Shift=1;HalfPage=5;}
-		else if(y>=24&&y<28){Page=3;Shift=0;HalfPage=6;}else if(y>=28&&y<32){Page=3;Shift=1;HalfPage=7;}
 		uint8_t temp=0;
 		y-=(4*(HalfPage));
 		temp=(y*64)/32;
@@ -262,10 +258,10 @@ void OLED_Byte_READ(uint8_t x, uint8_t y, uint8_t *ScreenBuffer){
 
 		
 uint8_t OUT =ScreenBuffer[((128*Page)+x)];
-USART_Send("\r\n ScreenBuffer= ");
-USART_Int_StrBIN(OUT,0);
+// USART_Send("\r\n ScreenBuffer= ");
+// USART_Int_StrBIT(OUT,0);
 uint8_t dataRead=0;
-USART_Send("\r\n Data = ");
+/*USART_Send("\r\n Data = ");*/
 if(OUT&0b1){dataRead+=1;}
 if(OUT&0b10){dataRead+=16;}
 if(OUT&0b100){dataRead+=2;}
@@ -274,67 +270,56 @@ if(OUT&0b10000){dataRead+=4;}
 if(OUT&0b100000){dataRead+=64;}
 if(OUT&0b1000000){dataRead+=8;}
 if(OUT&0b10000000){dataRead+=128;}
-USART_Int_StrBIN(dataRead,0);
-USART_Send("\r\n Address= ");
-USART_Int_Str(INDEX,0);
-// USART_Send("\r\n temp= ");
-// USART_Int_Str(temp,0);
-// USART_Send("\r\n y= ");
-// USART_Int_Str(y,0);
-// USART_Send("\r\n x= ");
-// USART_Int_Str(x,0);
-// USART_Send("\r\n Shift= ");
-// USART_Int_Str(Shift,0);
-// USART_Send("\r\n HalfPage= ");
-// USART_Int_Str(HalfPage,0);
-// USART_Send("\r\n Page= ");
-// USART_Int_Str(Page,0);
-// USART_Send("\r\n ShiftData= ");
-// USART_Int_StrBIT(ScreenBuffer[((128*Page)+x)]>>1,0);
+
 }else{return;}
 }
 
 
-void OLED_Byte( uint8_t x, uint8_t y,uint8_t *SB, uint8_t data){
-	OLED_XY_pixel(x,y,SB,data&0b1);
-	OLED_XY_pixel(x,y+1,SB,data&0b10);
-	OLED_XY_pixel(x,y+2,SB,data&0b100);
-	OLED_XY_pixel(x,y+3,SB,data&0b1000);
-	OLED_XY_pixel(x,y+4,SB,data&0b10000);
-	OLED_XY_pixel(x,y+5,SB,data&0b100000);
-	OLED_XY_pixel(x,y+6,SB,data&0b1000000);
-	OLED_XY_pixel(x,y+7,SB,data&0b10000000);
+void SSD1306_Byte( uint8_t x, uint8_t y,uint8_t *SB, uint8_t data){
+	SSD1306_XY_pixel(x,y,SB,data&0b1);
+	SSD1306_XY_pixel(x,y+1,SB,data&0b10);
+	SSD1306_XY_pixel(x,y+2,SB,data&0b100);
+	SSD1306_XY_pixel(x,y+3,SB,data&0b1000);
+	SSD1306_XY_pixel(x,y+4,SB,data&0b10000);
+	SSD1306_XY_pixel(x,y+5,SB,data&0b100000);
+	SSD1306_XY_pixel(x,y+6,SB,data&0b1000000);
+	SSD1306_XY_pixel(x,y+7,SB,data&0b10000000);
 }
 
-void OLED_VLine(uint8_t x, uint8_t y, uint8_t lenght, uint8_t*SB){
+void SSD1306_VLine(uint8_t x, uint8_t y, uint8_t lenght, uint8_t*SB){
 	for (int i=0; i<lenght && i<32;i++)
 	{
-		OLED_XY_pixel(x,y+i,SB,1);
+		SSD1306_XY_pixel(x,y+i,SB,1);
 	}
 }
 
-void OLED_HLine(uint8_t x, uint8_t y, uint8_t lenght, uint8_t*SB){
+void SSD1306_HLine(uint8_t x, uint8_t y, uint8_t lenght, uint8_t*SB){
 	for (int i=0; i<lenght && i<127;i++)
 	{
-		OLED_XY_pixel(x+i,y,SB,1);
+		SSD1306_XY_pixel(x+i,y,SB,1);
 	}
 }
-void OLED_Rect(uint8_t x1,uint8_t y1,uint8_t x2,uint8_t y2,uint8_t*SB){
+void SSD1306_Rect(uint8_t x1,uint8_t y1,uint8_t x2,uint8_t y2,uint8_t*SB){
 	uint8_t length = x2 - x1 + 1;
 	uint8_t height = y2 - y1;
 	
-	OLED_VLine(x1,y1,height,SB);
-	OLED_VLine(x2,y1,height,SB);
-	OLED_HLine(x1,y1,length,SB);
-	OLED_HLine(x1,y2,length,SB);
+	SSD1306_VLine(x1,y1,height,SB);
+	SSD1306_VLine(x2,y1,height,SB);
+	SSD1306_HLine(x1,y1,length,SB);
+	SSD1306_HLine(x1,y2,length,SB);
 }
-void OLED_Bitmap(uint8_t*IA, uint8_t*SB){
+void SSD1306_Bitmap(uint8_t*IA, uint8_t*SB){
 int page=0;
 int Xpos=0;
-for (int i=0; i<512; i++)
-{
-if(i==128||i==256||i==384){page++;Xpos=0;}
-OLED_Byte(Xpos,page,SB,IA[i]);
-Xpos++;
+for (int i=0; i<512; i++)
+
+{
+
+if(i==128||i==256||i==384){page++;Xpos=0;}
+
+SSD1306_Byte(Xpos,page,SB,IA[i]);
+
+Xpos++;
+
 }
 }
