@@ -1,38 +1,6 @@
-#define F_CPU 20000000UL// Define CPU frequency here 20MHZ
-#include <avr/io.h>
-#include <util/delay.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <avr/interrupt.h>
-#include <math.h>
-#include <string.h>
-//#define I2CbufferSize 1024
-/* Define bit rate */
-#define SCL_CLK 400000
-#define BITRATE(TWSR)	((F_CPU/SCL_CLK)-16)/(2*pow(4,(TWSR&((1<<TWPS0)|(1<<TWPS1)))))
 
-// void I2C_Init();											/* I2C initialize function */
-// uint8_t I2C_Start(char);						/* I2C start function */
-// void I2C_Start_NORETURN(uint8_t);
-// uint8_t I2C_Repeated_Start(char);				/* I2C repeated start function */
-// void I2C_Stop();											/* I2C stop function */						/* Wait until stop condition execution */
-// void I2C_Start_Wait(char );						/* I2C start wait function */
-// uint8_t I2C_Write(char );								/* I2C write function */
-// char I2C_Read_Ack();										/* I2C read ack function */
-// char I2C_Read_Nack();										/* I2C read nack function */
-// void I2C_Slave_Init(uint8_t );
-// int8_t I2C_Slave_Listen();
-// int8_t I2C_Slave_Transmit(char );
-// char I2C_Slave_Receive();
-// int I2C_Event(char*,char*);
-// void I2C_SRS(int );
-// void I2C_Read(int , char*);
-// void I2C_Str(char*,int );
-// void I2C_SI(int , int );
+#include "I2C_AM16.h"
 
-
-
- // SCL freq= F_CPU/(16+2(TWBR).4^TWPS)
 void I2C_Init()												/* I2C initialize function */
 {
 	TWBR = BITRATE(TWSR = 0x00);							/* Get bit rate register value by formula */
@@ -67,7 +35,7 @@ void I2C_Start_NORETURN(uint8_t write_address){
 		while (!(TWCR & (1<<TWINT)));
 }
 
-uint8_t I2C_Repeated_Start(char read_address)				/* I2C repeated start function */
+uint8_t I2C_Repeated_Start(uint8_t read_address)			/* I2C repeated start function */
 {
 	uint8_t status;											/* Declare variable */
 	TWCR = (1<<TWSTA)|(1<<TWEN)|(1<<TWINT);					/* Enable TWI, generate start condition and clear interrupt flag */
@@ -131,14 +99,14 @@ uint8_t I2C_Write(char data)								/* I2C write function */
 	return 2;												/* Else return 2 to indicate data transmission failed */
 }
 
-char I2C_Read_Ack()											/* I2C read ack function */
+uint8_t I2C_Read_Ack()											/* I2C read ack function */
 {
 	TWCR=(1<<TWEN)|(1<<TWINT)|(1<<TWEA);					/* Enable TWI, generation of ack and clear interrupt flag */
 	while (!(TWCR & (1<<TWINT)));							/* Wait until TWI finish its current job (read operation) */
 	return TWDR;											/* Return received data */
 }
 
-char I2C_Read_Nack()										/* I2C read nack function */
+uint8_t I2C_Read_Nack()										/* I2C read nack function */
 {
 	TWCR=(1<<TWEN)|(1<<TWINT);								/* Enable TWI and clear interrupt flag */
 	while (!(TWCR & (1<<TWINT)));							/* Wait until TWI finish its current job (read operation)*/
@@ -154,7 +122,7 @@ void I2C_Slave_Init(uint8_t slave_address)
 
 }
 
-int8_t I2C_Slave_Listen()
+uint8_t I2C_Slave_Listen()
 {
 	while(1)
 	{
@@ -171,7 +139,7 @@ int8_t I2C_Slave_Listen()
 		continue;			/* Else continue */
 	}
 }
-int8_t I2C_Slave_Transmit(char data)
+uint8_t I2C_Slave_Transmit(char data)
 {
 	uint8_t status;
 	TWDR = data;								/* Write data to TWDR to be transmitted */
@@ -180,20 +148,20 @@ int8_t I2C_Slave_Transmit(char data)
 	status = TWSR & 0xF8;						/* Read TWI status register with masking lower three bits */
 	if (status == 0xA0)							/* Check weather STOP/REPEATED START received */
 	{
-		TWCR |= (1<<TWINT);						/* If yes then clear interrupt flag & return -1 */
-		return -1;
+		TWCR |= (1<<TWINT);						/* If yes then clear interrupt flag & return 1 */
+		return 1;
 	}
 	if (status == 0xB8)							/* Check weather data transmitted & ack received */
 	return 0;									/* If yes then return 0 */
 	if (status == 0xC0)							/* Check weather data transmitted & nack received */
 	{
-		TWCR |= (1<<TWINT);						/* If yes then clear interrupt flag & return -2 */
-		return -2;
+		TWCR |= (1<<TWINT);						/* If yes then clear interrupt flag & return 2 */
+		return 2;
 	}
 	if (status == 0xC8)							/* If last data byte transmitted with ack received TWEA = 0 */
-	return -3;									/* If yes then return -3 */
-	else										/* else return -4 */
-	return -4;
+	return 3;									/* If yes then return 3 */
+	else										/* else return 4 */
+	return 4;
 }
 
 // uint8_t I2C_read_slave(void)
@@ -205,7 +173,7 @@ int8_t I2C_Slave_Transmit(char data)
 // 	return TWDR; // Get value from TWDR//
 // }
 
-char I2C_Slave_Receive()
+uint8_t I2C_Slave_Receive()
 {
 	uint8_t status;		/* Declare variable */
 	TWCR=(1<<TWEN)|(1<<TWEA)|(1<<TWINT);/* Enable TWI & generation of ack */
@@ -219,17 +187,17 @@ char I2C_Slave_Receive()
 	return TWDR;		/* If yes then return received data */
 	if(status==0xA0)		/* Check wether STOP/REPEATED START */
 	{
-		TWCR|=(1<<TWINT);	/* Clear interrupt flag & return -1 */
-		return '|';
+		TWCR|=(1<<TWINT);	/* Clear interrupt flag & return 1 */
+		return 1;
 	}
 	else
-	return -2;			/* Else return -2 */
+	return 2;			/* Else return 2 */
 }
 
 
 
-int I2C_Event(char*WriteBuffer,char* ReadBuffer){
-int8_t count = 0;
+uint8_t I2C_Event(char*WriteBuffer,char* ReadBuffer){
+uint8_t count = 0;
 int x = 3;
 
 x =I2C_Slave_Listen();
@@ -260,13 +228,13 @@ State=2;
 return State;
 }
 
-void I2C_SRS(int address){
+void I2C_SRS(uint8_t address){
 	I2C_Start(address);
 	I2C_Write(0x00);
 	I2C_Repeated_Start(address+1);
 }
 
-void I2C_Read(int address, char *str ){
+void I2C_Read(uint8_t address, char *str ){
 I2C_SRS(address);
 int count =-1;
 do {
@@ -280,7 +248,7 @@ str[count]=0;
 I2C_Stop();	
 }
 
-void I2C_ReadWNES(int address, char *str, uint8_t NumOfBytes){
+void I2C_ReadWNES(uint8_t address, char *str, uint8_t NumOfBytes){
 	I2C_SRS(address);
 	int count =0;
 	do {

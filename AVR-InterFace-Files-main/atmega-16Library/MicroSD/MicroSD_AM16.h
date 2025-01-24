@@ -21,6 +21,10 @@
 #define SD_MAX_READ_ATTEMPTS    62500
 #define SD_MAX_WRITE_ATTEMPTS    62500
 
+//Remember to set DDR for pins!!!!
+
+
+
 //prototypes 
 /*
 * Sends a command to the SD card

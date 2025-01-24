@@ -12,21 +12,8 @@
 
 #include "FAT32.h"
 
-
-
 // For reading and writing files in FAT32
 #if defined(FAT32)
-
-// Init vars
-uint32_t RootDirSec;
-uint32_t FATStartSec;
-uint32_t FatSecs;
-uint32_t LBA;
-uint32_t SecsPerClust;
-uint32_t BytesPerSec;
-uint32_t FSInfo;
-
-
 
 
 // Find FAT32 Root Directory
@@ -56,7 +43,7 @@ void FAT32_Init(char partitionNUM){
 
 //Find File location if Root Directory and First Data cluster of file
 
-uint8_t FAT32_FILE_Open(struct File file){
+uint8_t FAT32_FILE_Open( File file){
 	static uint16_t locX;
 	short flag=1;
 	uint32_t loci;
@@ -82,16 +69,19 @@ uint8_t FAT32_FILE_Open(struct File file){
 	}
 
 	if(flag ==2){
-		//Attr=DataBuff[locX+0x0B];
-		file.FILELocationInRootDir = (loci<<9)+locX;
-		file.FirstClustAddr = (65536*(DataBuff[locX+0x15])) + (4096*(DataBuff[locX+0x14]))+(256*(DataBuff[locX+0x1B]))+(DataBuff[locX+0x1a]);
+		//Attr=DataBuff[locX+0x0B]
+		FILELocationInRootDir = (loci<<9)+locX;
+			USART_Send("\r\n read 1: ");
+			USART_Long_Str(FILELocationInRootDir,0);
+			USART_Send("\r\n");
+		FirstClustAddr = (65536*(DataBuff[locX+0x15])) + (4096*(DataBuff[locX+0x14]))+(256*(DataBuff[locX+0x1B]))+(DataBuff[locX+0x1a]);
 		return 0;
 	}
 	return 1;
 }
 
 
-void FAT32_FILE_Check(struct File file){
+void FAT32_FILE_Check(File file){
 	if(FAT32_FILE_Open(file)==0)USART_Send("\r\nFile Found");else USART_Send("\r\nFile not Found");
 }
 
@@ -109,27 +99,27 @@ void FAT32_Report(){
 	USART_Send("\r\n");
 }
 
-void FAT32_FILE_Report(struct File file){
+void FAT32_FILE_Report( File file){
 	FAT32_FILE_Check(file);
 	USART_Send("\r\n Name of File is: ");
 	USART_Send(file.Fname);
 	USART_Send(" | Type of File is: ");
 	USART_Send(file.type);
 	USART_Send(" | FCA: ");
-	USART_Long_Str(file.FirstClustAddr,0);
+	USART_Long_Str(FirstClustAddr,0);
 	USART_Send(" | FLIRD: ");
-	USART_Long_Str(file.FILELocationInRootDir,0);
+	USART_Long_Str(FILELocationInRootDir,0);
 	USART_Send("\r\n");
 }
 
 
 
-
-uint8_t FAT32_FILE_Read(struct File file){
+#if defined(USARTTX)
+uint8_t FAT32_FILE_Read( File file){
 	
 	if(	FAT32_FILE_Open(file) ==0){
 
-		uint32_t CurrentClust = file.FirstClustAddr;
+		uint32_t CurrentClust = FirstClustAddr;
 
 		// FAT32[First Data Cluster]--> Next Data Cluster of Data;
 		//I.E In the FAT32 Primary FAT, The index of (FirstDataCluster*4) (4 for 4 bytes) gives the index of the next cluster(bits 0-6)and the cluster location (bits 0-511);
@@ -143,9 +133,9 @@ uint8_t FAT32_FILE_Read(struct File file){
 			while(++c<SecsPerClust){
 				
 				
-// 				USART_Send("\r\n Sector: ");
-// 				USART_Int_Str(c,0);
-// 				USART_Send("\r\n");		
+				USART_Send("\r\n Sector: ");
+				USART_Int_Str(c,0);
+				USART_Send("\r\n");		
 				
 				
 				SD_RSB(DataBuff,loc+c);
@@ -169,8 +159,7 @@ uint8_t FAT32_FILE_Read(struct File file){
 	}
 	return 1;
 }
-
-
+#endif
 
 
 
@@ -191,11 +180,11 @@ void ClearClust(uint32_t ClustAddr){
 
 
 
-uint8_t FAT32_FILE_Delete_Contents(struct File file){
+uint8_t FAT32_FILE_Delete_Contents( File file){
 	if(	FAT32_FILE_Open(file) ==0){
-		uint32_t CurrentClust = file.FirstClustAddr;	//
+		uint32_t CurrentClust = FirstClustAddr;	//
 		uint32_t AddrData=0;
-		while(file.FirstClustAddr!=0){
+		while(FirstClustAddr!=0){
 			long loc = RootDirSec+(32*(CurrentClust-2));
 			long ConstMin = 512*(int)(CurrentClust/128);
 
@@ -234,9 +223,9 @@ uint8_t FAT32_FILE_Delete_Contents(struct File file){
 
 
 
-uint8_t FAT32_Clear_From_FAT(struct File file){
+uint8_t FAT32_Clear_From_FAT( File file){
 	if(FAT32_FILE_Open(file)==0){
-		uint32_t CurrentClust = file.FirstClustAddr;
+		uint32_t CurrentClust = FirstClustAddr;
 		uint32_t AddrData =0;
 		while(1){
 			long ConstMin = 512*(int)(CurrentClust/128);
@@ -279,7 +268,7 @@ uint8_t FAT32_Clear_From_FAT(struct File file){
 
 
 
-uint8_t FAT32_Clear_From_Dir(struct File file){
+uint8_t FAT32_Clear_From_Dir( File file){
 	static uint16_t locX;
 	static uint16_t locI;
 	short flag=1;
@@ -322,7 +311,7 @@ uint8_t FAT32_Clear_From_Dir(struct File file){
 
 
 
-void FAT32_FILE_Delete(struct File file){
+void FAT32_FILE_Delete(File file){
 	if (FAT32_FILE_Delete_Contents(file)==0){
 	_delay_ms(100);
 	FAT32_Clear_From_FAT(file);
@@ -396,13 +385,13 @@ void FAT32_Update_FATWithNewEndingTAG(long Clust){
 
 
 
-uint32_t FAT32_LocationOfLastClustInFile(struct File file){
+uint32_t FAT32_LocationOfLastClustInFile( File file){
 	if(FAT32_FILE_Open(file)==0){
 		
-		uint32_t CurrentClust = file.FirstClustAddr;
+		uint32_t CurrentClust = FirstClustAddr;
 		uint32_t AddrData=0;
 
-		while(file.FirstClustAddr!=0){
+		while(FirstClustAddr!=0){
 			
 			uint32_t OverFlow = ((int)CurrentClust/128);
 			uint32_t ConstMin = 512*OverFlow;
@@ -448,7 +437,7 @@ uint32_t FAT32_LocationOfLastClustInFile(struct File file){
 
 // set the OriginalLasClust to Point to NewLastClust
 
-char FAT32_UpdateFatWithNewClustLoc(struct File file, uint32_t NewLastclust, char flag){
+char FAT32_UpdateFatWithNewClustLoc( File file, uint32_t NewLastclust, char flag){
 	uint32_t OriginalLastCl =0;
 
 
@@ -483,7 +472,7 @@ char FAT32_UpdateFatWithNewClustLoc(struct File file, uint32_t NewLastclust, cha
 
 
 
-uint8_t FAT32_Append(struct File file){
+uint8_t FAT32_Append( File file){
 	uint16_t clust= (FAT32_RETURNING_NEXT_OPEN_CLUST());
 	if(FAT32_UpdateFatWithNewClustLoc(file,clust,0)==0)
 	FAT32_Update_FATWithNewEndingTAG(clust);
@@ -496,7 +485,7 @@ uint8_t FAT32_Append(struct File file){
 
 
 uint8_t FAT32_Append_Cluster_RootDir(){
-	struct File temp;
+	File temp;
 	uint16_t clust= (FAT32_RETURNING_NEXT_OPEN_CLUST());
 	FAT32_UpdateFatWithNewClustLoc(temp,clust,1);
 	FAT32_Update_FATWithNewEndingTAG(clust);
@@ -519,7 +508,7 @@ uint8_t FAT32_Append_Cluster_RootDir(){
 
 
 
-uint8_t FAT32_FILE_Create(struct File file, char tempstr[]){
+uint8_t FAT32_FILE_Create( File file, char tempstr[]){
 
 if(FAT32_FILE_Open(file)==1){
 	
@@ -528,7 +517,7 @@ if(FAT32_FILE_Open(file)==1){
 
 	int Addr=0;
 	uint32_t out = FAT32_RETURNING_NEXT_OPEN_CLUST();
-	 file.FirstClustAddr =out;
+	 FirstClustAddr =out;
 	 
 	SD_RSB(DataBuff,RootDirSec);
 
@@ -604,12 +593,12 @@ else return 1;
 
 
 
-uint8_t FAT32_FILE_UpdateFileSize(struct File file){
+uint8_t FAT32_FILE_UpdateFileSize( File file){
 	
 	if(FAT32_FILE_Open(file)==0){
-		SD_RSB(DataBuff,RootDirSec+(file.FILELocationInRootDir>>9));
-		uint16_t temp= file.FILELocationInRootDir&511;
-		uint32_t  Size = file.FirstClustAddr-FAT32_LocationOfLastClustInFile(file);
+		SD_RSB(DataBuff,RootDirSec+(FILELocationInRootDir>>9));
+		uint16_t temp= FILELocationInRootDir&511;
+		uint32_t  Size = FirstClustAddr-FAT32_LocationOfLastClustInFile(file);
 		DataBuff[temp+27]= Size&0xFF;
 		DataBuff[temp+28]= (Size& 0xff00)>>8;
 		DataBuff[temp+29]= (Size&0xFF0000)>>16;
@@ -626,13 +615,13 @@ uint8_t FAT32_FILE_UpdateFileSize(struct File file){
 
 
 
-uint8_t FAT32_FILE_Read_Sector_In_Cluster(struct File file, long Clust,uint8_t Sect){
+uint8_t FAT32_FILE_Read_Sector_In_Cluster( File file, long Clust,uint8_t Sect){
 	
 	if(Sect<SecsPerClust){
 		
 		if(	FAT32_FILE_Open(file) ==0){
 			
-			uint32_t CurrentClust = file.FirstClustAddr;
+			uint32_t CurrentClust = FirstClustAddr;
 			uint32_t AddrData =0;
 			uint16_t TempCount=0;
 			
@@ -677,14 +666,14 @@ uint8_t FAT32_FILE_Read_Sector_In_Cluster(struct File file, long Clust,uint8_t S
 
 
 
-uint8_t FAT32_FILE_Write_Sector_In_Cluster(struct File Wfile, long Clust,uint8_t Sect){
+uint8_t FAT32_FILE_Write_Sector_In_Cluster( File file, long Clust,uint8_t Sect){
 	SD_WSB(DataBuff,(RootDirSec+(32*(ReseveClust-2))+Sect));
 	_delay_ms(50);
 	if(Sect<SecsPerClust){
 
-		if(	FAT32_FILE_Open(Wfile)==0){
+		if(	FAT32_FILE_Open(file)==0){
 	
-			uint32_t CurrentClust = Wfile.FirstClustAddr;
+			uint32_t CurrentClust = FirstClustAddr;
 			char TempCount=0;
 
 
