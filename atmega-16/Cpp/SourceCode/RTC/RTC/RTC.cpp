@@ -3,8 +3,7 @@
 
 #include "RTC.h"
 
-#if defined (I2C)
-void RTC_Clock_Write(char _hour, char _minute, char _second, char AMPM)
+void RTC::Clock_Write(char _hour, char _minute, char _second, char AMPM)
 {
 	_second= ((int)((_second/10)<<4))|(_second-((int)(_second/10)*10));
 	_minute= ((int)((_minute/10)<<4))|(_minute-((int)(_minute/10)*10));
@@ -22,7 +21,7 @@ void RTC_Clock_Write(char _hour, char _minute, char _second, char AMPM)
 	
 }
 
-void RTC_Clock_Read(char *str)
+void  RTC::Clock_Read(uint8_t *str)
 {
 
 	i2c.Start(Device_Write_address);/* Start I2C communication with RTC */
@@ -47,7 +46,13 @@ void RTC_Clock_Read(char *str)
 	str[3]=AMPM;
 }
 
-void RTC_Calendar_Write(char _day, char _date, char _month, char _year)
+void RTC::Clock_Read(char *str){
+	Clock_Read((uint8_t *)str);
+}
+
+
+
+void  RTC::Calendar_Write(char _day, char _date, char _month, char _year)
 {
 	_date= ((int)((_date/10)<<4))|(_date-((int)(_date/10)*10));
 	_month= ((int)((_month/10)<<4))|(_month-((int)(_month/10)*10));
@@ -64,7 +69,7 @@ void RTC_Calendar_Write(char _day, char _date, char _month, char _year)
 
 
 
-void RTC_Calendar_Read(char*str)
+void  RTC::Calendar_Read(uint8_t *str)
 {
 	i2c.Start(Device_Write_address);
 	i2c.Write(3);
@@ -84,4 +89,7 @@ void RTC_Calendar_Read(char*str)
 	str[6]=month;
 	str[7]=year;
 }
-#endif
+
+void RTC::Calendar_Read(char *str){
+	Calendar_Read((uint8_t *)str);
+}

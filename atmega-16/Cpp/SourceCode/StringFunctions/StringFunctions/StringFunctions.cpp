@@ -80,3 +80,6 @@ void String::UpdateString(char *strData,unsigned char*Str){
 }
 
 
+void String::UpdateString(uint8_t *strData,uint8_t*Str){
+	UpdateString((char*)strData,Str);
+}

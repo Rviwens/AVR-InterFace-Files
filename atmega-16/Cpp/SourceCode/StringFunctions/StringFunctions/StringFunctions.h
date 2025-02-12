@@ -24,6 +24,7 @@ void dtoa(double Num,const char*str3);
 * @param Str - String to be rewritten
 */
 void UpdateString(char *strData,unsigned char*Str);
+void UpdateString(uint8_t*strData,uint8_t*Str);
 /*
 * Reverses the elements in a Array
 * @param Str - String to be reversed

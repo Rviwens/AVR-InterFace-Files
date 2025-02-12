@@ -9,8 +9,8 @@
 #include <util/delay.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <avr/interrupt.h>
 #include <string.h>
+#include <StringFunctions.h>
 
 #define COMMAND_PORT PORTB
 #define DATA_PORT PORTB
@@ -24,9 +24,9 @@ class LCD_16X2 {
 public:
 LCD_16X2();
 
-LCD_16X2(char mode);
+LCD_16X2(uint8_t mode);
 
-void Init(char mode);
+void Init(uint8_t mode);
 
 void Clear();
 
@@ -38,20 +38,22 @@ void ShiftCursor(int Direction);
 
 void ShiftDisplay(int Direction);
 
-void String (char *str);
+void Str (char *str);
+void Str (const char *str);
 
 void String_xy (char row, char pos, char *str);
 
 void Long_Str(unsigned long Vaule, int Number_System);
 
-void int_Str(unsigned int INT, int Number_System);
+void Int_Str(unsigned int INT, int Number_System);
 
 void dtoa(double doub);
 
 void Custom (unsigned char loc,uint8_t R1, uint8_t R2,uint8_t R3,uint8_t R4, uint8_t R5, uint8_t R6, uint8_t R7, uint8_t R8);
 
 private:
-static short Mode;
+short Mode;
+String string;
 
 void E_Pulse(void);
 

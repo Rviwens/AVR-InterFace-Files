@@ -1,5 +1,10 @@
 #include "LCD_16x2.h"
- 
+
+ LCD_16X2::LCD_16X2(){
+Init(8); 
+ }
+
+ LCD_16X2::LCD_16X2(uint8_t mode){Init(mode); }
 
 void LCD_16X2::E_Pulse(void){COMMAND_PORT|=(1<<E);_delay_us(20);COMMAND_PORT&=~(1<<E);_delay_us(20);}
 
@@ -49,7 +54,7 @@ if(Mode==4){
 LCD_Port =0X00;
 }
  
-void LCD_16X2::Init(char mode){
+void LCD_16X2::Init(uint8_t mode){
 Mode=mode;
 if(Mode==8){
 Command(0x0C);
@@ -94,14 +99,15 @@ if (Direction==0){Command(0x05);}
 if (Direction==1){Command(0x07);}
 }
 
-void LCD_16X2::String (char *str){int i;for(i=0;str[i]!=0;i++){character(str[i]);}}
-
+void LCD_16X2::Str (char *str){int i;for(i=0;str[i]!=0;i++){character(str[i]);}}
+void LCD_16X2::Str (const char *str){Str((char*)str);}
+	
 void LCD_16X2::String_xy (char row, char pos, char *str){
 	if (row == 0 && pos<16)
 	Command((pos & 0x0F)|0x80);	
 	else if (row == 1 && pos<16){
 	Command((pos & 0x0F)|0xC0);	
-	String(str);		
+	Str(str);		
 }
 }
 
@@ -110,35 +116,33 @@ void LCD_16X2::Long_Str(unsigned long Vaule, int Number_System){
 long GH =10000000;
 char HOLD[GH];
 ltoa(Vaule,HOLD,Number_System);
-String(HOLD);
-
+Str(HOLD);
 }
 
 
-void LCD_16X2::int_Str(unsigned int INT, int Number_System){
+void LCD_16X2::Int_Str(unsigned int INT, int Number_System){
     char Holder[100];
 	itoa(INT,Holder,Number_System);
-	String(Holder);
+	Str(Holder);
 }
 void LCD_16X2::dtoa(double doub){
     char Holder[100];
-   // dtoa(doub,Holder);
-    String(Holder);
+	string.dtoa(doub,Holder);
+    Str(Holder);
 }
 
 void LCD_16X2::Custom (unsigned char loc,uint8_t R1, uint8_t R2,uint8_t R3,uint8_t R4, uint8_t R5, uint8_t R6, uint8_t R7, uint8_t R8)
 {
-	unsigned char msg[8];
+unsigned char msg[8];
 	
-	
-if(loc==1){unsigned char Character1[8] = {R1,R2,R3,R4,R5,R6,R7,R8}; UpdateString(Character1,msg);}else
-if(loc==2){unsigned char Character2[8] = {R1,R2,R3,R4,R5,R6,R7,R8}; UpdateString(Character2,msg);}else
-if(loc==3){unsigned char Character3[8] = {R1,R2,R3,R4,R5,R6,R7,R8}; UpdateString(Character3,msg);}else
-if(loc==4){unsigned char Character4[8] = {R1,R2,R3,R4,R5,R6,R7,R8}; UpdateString(Character4,msg);}else
-if(loc==5){unsigned char Character5[8] = {R1,R2,R3,R4,R5,R6,R7,R8}; UpdateString(Character5,msg);}else
-if(loc==6){unsigned char Character6[8] = {R1,R2,R3,R4,R5,R6,R7,R8}; UpdateString(Character6,msg);}else
-if(loc==7){unsigned char Character7[8] = {R1,R2,R3,R4,R5,R6,R7,R8}; UpdateString(Character7,msg);}else
-if(loc==8){unsigned char Character8[8] = {R1,R2,R3,R4,R5,R6,R7,R8}; UpdateString(Character8,msg);}
+if(loc==1){unsigned char Character1[8] = {R1,R2,R3,R4,R5,R6,R7,R8}; string.UpdateString(Character1,msg);}else
+if(loc==2){unsigned char Character2[8] = {R1,R2,R3,R4,R5,R6,R7,R8}; string.UpdateString(Character2,msg);}else
+if(loc==3){unsigned char Character3[8] = {R1,R2,R3,R4,R5,R6,R7,R8}; string.UpdateString(Character3,msg);}else
+if(loc==4){unsigned char Character4[8] = {R1,R2,R3,R4,R5,R6,R7,R8}; string.UpdateString(Character4,msg);}else
+if(loc==5){unsigned char Character5[8] = {R1,R2,R3,R4,R5,R6,R7,R8}; string.UpdateString(Character5,msg);}else
+if(loc==6){unsigned char Character6[8] = {R1,R2,R3,R4,R5,R6,R7,R8}; string.UpdateString(Character6,msg);}else
+if(loc==7){unsigned char Character7[8] = {R1,R2,R3,R4,R5,R6,R7,R8}; string.UpdateString(Character7,msg);}else
+if(loc==8){unsigned char Character8[8] = {R1,R2,R3,R4,R5,R6,R7,R8}; string.UpdateString(Character8,msg);}
 
     unsigned char i;
     if(loc<8)
