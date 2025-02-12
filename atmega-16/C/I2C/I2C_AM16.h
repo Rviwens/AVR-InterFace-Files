@@ -1,4 +1,10 @@
-#define F_CPU 20000000UL// Define CPU frequency here 20MHZ
+
+#ifndef I2C_GUARD
+#define I2C_GUARD
+
+#ifndef F_PU
+#define F_CPU 20000000UL	// Define CPU frequency here 20MHZ
+#endif
 #include <avr/io.h>
 #include <util/delay.h>
 #include <stdio.h>
@@ -43,7 +49,7 @@
  * @return 2-  nack received 
  * @return 3 - SLA+W failed
  */
- uint8_t I2C_Repeated_Start(char read_address);
+ uint8_t I2C_Repeated_Start(uint8_t read_address);
    /*
  * Stops I2C 
  */
@@ -139,3 +145,4 @@
  * @param slave_address - The I2C address of this device
  */
  void I2C_SI(int num, int address);
+#endif

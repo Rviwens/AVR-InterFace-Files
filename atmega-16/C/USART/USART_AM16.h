@@ -1,14 +1,15 @@
-#include <avr/io.h>
+
 #include <util/delay.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <avr/interrupt.h>
 #include <math.h>
 #include <string.h>
+#include <TimerFunctions/AM16_Timer_Functions.c>
 
 #define Buffer_Size 128
 #define FequncyPin PIND7
-static long BAUD;
+long BAUD;
 
 /*
 * Initializes pins for IR communication

@@ -1,6 +1,3 @@
-
-
-
 #include "LCD_AM16_16x2.h"
  
 
@@ -97,7 +94,9 @@ if (Direction==0){LCD_Command(0x05);}
 if (Direction==1){LCD_Command(0x07);}
 }
 
-void LCD_String (char *str){int i;for(i=0;str[i]!=0;i++){LCD_character(str[i]);}}
+
+void LCD_String (char* str){int i;for(i=0;str[i]!=0;i++){LCD_character(str[i]);}}
+
 
 void LCD_String_xy (char row, char pos, char *str){
 	if (row == 0 && pos<16)
@@ -118,7 +117,7 @@ LCD_String(HOLD);
 }
 
 
-void LCD_int_Str(unsigned int INT, int Number_System){
+void LCD_Int_Str(unsigned int INT, int Number_System){
     char Holder[100];
 	itoa(INT,Holder,Number_System);
 	LCD_String(Holder);

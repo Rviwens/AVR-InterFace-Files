@@ -1,10 +1,16 @@
+#ifndef LCD_GUARD
+#define LCD_GUARD
+
+#ifndef F_PU
 #define F_CPU 20000000UL	// Define CPU frequency here 20MHZ
+#endif	
+
 #include <avr/io.h>
 #include <util/delay.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <avr/interrupt.h>
-#include <math.h>
+#include <CharFunctions/CharFunctions.c>
 
 #define COMMAND_PORT PORTB
 #define DATA_PORT PORTB
@@ -13,8 +19,8 @@
 #define RW PINB2
 #define LCD_Port PORTB
 
-static int Mode;
 
+int Mode;
 
 void E_Pulse(void);
 
@@ -40,8 +46,9 @@ void LCD_String_xy (char row, char pos, char *str);
 
 void LCD_Long_Str(unsigned long Vaule, int Number_System);
 
-void LCD_int_Str(unsigned int INT, int Number_System);
+void LCD_Int_Str(unsigned int INT, int Number_System);
 
 void LCD_dtoa(double doub);
 
 void LCD_Custom (unsigned char loc,int R1, int R2,int R3,int R4, int R5, int R6, int R7, int R8);
+#endif

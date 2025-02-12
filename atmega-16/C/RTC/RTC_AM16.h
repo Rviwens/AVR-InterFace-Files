@@ -1,12 +1,15 @@
-#define F_CPU 20000000UL	// Define CPU frequency here 20MHZ
+#ifndef RTC_GUARD
+#define RTC_GUARD
 
-#include <avr/io.h>
+#ifndef F_PU
+#define F_CPU 20000000UL	// Define CPU frequency here 20MHZ
+#endif
+
 #include <util/delay.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <avr/interrupt.h>
-#include <math.h>
 #include <string.h>
+#include <I2C/I2C_AM16.h>
 
 #define Device_Write_address	0xD0	/* Define RTC DS1307 slave write address */
 #define Device_Read_address	0xD1	/* Make LSB bit high of slave address for read */
@@ -25,7 +28,7 @@ void RTC_Clock_Write(char _hour, char _minute, char _second, char AMPM);
 * Reads the current time from the RTC
 * @param str - Pointer to an array[7] that will store the time and date
 */
-void RTC_Clock_Read(char *str);
+void RTC_Clock_Read(uint8_t *str);
 /*
 * Writes the current time to the RTC
 * @param _day- The current day (0->6)
@@ -38,4 +41,5 @@ void RTC_Calendar_Write(char _day, char _date, char _month, char _year);
 * Reads the current date from the RTC
 * @param str - Pointer to an array[7] that will store the time and date
 */
-void RTC_Calendar_Read(char*str);
+void RTC_Calendar_Read(uint8_t *str);
+#endif

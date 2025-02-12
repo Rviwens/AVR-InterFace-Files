@@ -1,9 +1,5 @@
-
-
-
 #include "RTC_AM16.h"
 
-#if defined (I2C)
 void RTC_Clock_Write(char _hour, char _minute, char _second, char AMPM)
 {
 		_second= ((int)((_second/10)<<4))|(_second-((int)(_second/10)*10));
@@ -22,7 +18,7 @@ void RTC_Clock_Write(char _hour, char _minute, char _second, char AMPM)
 	
 }
 
-void RTC_Clock_Read(char *str)
+void RTC_Clock_Read(uint8_t *str)
 {
 
 	I2C_Start(Device_Write_address);/* Start I2C communication with RTC */
@@ -64,7 +60,7 @@ void RTC_Calendar_Write(char _day, char _date, char _month, char _year)
 
 
 
-void RTC_Calendar_Read(char*str)
+void RTC_Calendar_Read(uint8_t*str)
 {
 	I2C_Start(Device_Write_address);
 	I2C_Write(3);
@@ -84,4 +80,4 @@ void RTC_Calendar_Read(char*str)
 	str[6]=month;
 	str[7]=year;
 }
-#endif
+

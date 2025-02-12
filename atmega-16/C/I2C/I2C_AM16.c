@@ -1,4 +1,3 @@
-
 #include "I2C_AM16.h"
 
 void I2C_Init()												/* I2C initialize function */
