@@ -133,7 +133,6 @@ uint8_t Repeated_Start(uint8_t read_address);
  * @param slave_address - The I2C address of this device
  */
  void SI(int num, int address);
- private:
  /*
  * Reads a byte of data from the slave device and sends an acknowledgment
  * @return TWDR-  received data

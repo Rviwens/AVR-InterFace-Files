@@ -11,7 +11,6 @@
 
 class RTC {
 public:
-I2C i2c();
 /*
 * Writes the current time to the RTC
 * @param _hour- The current Hour
@@ -19,12 +18,13 @@ I2C i2c();
 * @param _second- The current second
 * @param AMPM - 0 if AM, 1 if PM
 */
-void RTC_Clock_Write(char _hour, char _minute, char _second, char AMPM);
+void Clock_Write(char _hour, char _minute, char _second, char AMPM);
 /*
 * Reads the current time from the RTC
 * @param str - Pointer to an array[7] that will store the time and date
 */
-void RTC_Clock_Read(char *str);
+void Clock_Read(uint8_t *str);
+void Clock_Read(char *str);
 /*
 * Writes the current time to the RTC
 * @param _day- The current day (0->6)
@@ -32,12 +32,15 @@ void RTC_Clock_Read(char *str);
 * @param _month- The current month
 * @param _year - the current year's last two digits
 */
-void RTC_Calendar_Write(char _day, char _date, char _month, char _year);
+void Calendar_Write(char _day, char _date, char _month, char _year);
 /*
 * Reads the current date from the RTC
 * @param str - Pointer to an array[7] that will store the time and date
 */
-void RTC_Calendar_Read(char*str);
+void Calendar_Read(uint8_t*str);
+void Calendar_Read(char *str);
+
 private:
 uint8_t second,minute,hour,day,date,month,year;
+I2C i2c;
 };
