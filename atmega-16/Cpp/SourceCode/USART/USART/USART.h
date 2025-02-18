@@ -12,6 +12,7 @@
 #include <avr/interrupt.h>
 #include <math.h>
 #include <string.h>
+#include <StringFunctions.h>
 
 
 #define Buffer_Size 128
@@ -95,7 +96,7 @@ class USART{
 	* @param ES - if set, a ending tag will be sent (" |E")
 	*/
 	void Long_StrBIN(long I, short ES);
-
+	void Dtoa(double d, short ES);
 	/*
 	* Checks if RX buffer has data
 	*/

@@ -117,6 +117,12 @@ void USART::Long_StrBIN(long I, short ES){
 	ltoa(I,NUM_Hold,2);
 	Send_ESS(NUM_Hold,ES);
 }
+void USART::Dtoa(double d, short ES){
+char buff[10];
+String s1;
+s1.dtoa(d,buff);
+Send(buff);
+}
 
 
 

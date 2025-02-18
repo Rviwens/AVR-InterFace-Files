@@ -37,7 +37,7 @@ SUBDIRS :=
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS +=  \
-../USART.cpp
+../SSD1306_Driver.cpp
 
 
 PREPROCESSING_SRCS += 
@@ -47,20 +47,20 @@ ASM_SRCS +=
 
 
 OBJS +=  \
-USART.o
+SSD1306_Driver.o
 
 OBJS_AS_ARGS +=  \
-USART.o
+SSD1306_Driver.o
 
 C_DEPS +=  \
-USART.d
+SSD1306_Driver.d
 
 C_DEPS_AS_ARGS +=  \
-USART.d
+SSD1306_Driver.d
 
-OUTPUT_FILE_PATH +=libUSART.a
+OUTPUT_FILE_PATH +=libSSD1306_Driver.a
 
-OUTPUT_FILE_PATH_AS_ARGS +=libUSART.a
+OUTPUT_FILE_PATH_AS_ARGS +=libSSD1306_Driver.a
 
 ADDITIONAL_DEPENDENCIES:=
 
@@ -72,10 +72,10 @@ LINKER_SCRIPT_DEP+=
 
 
 # AVR32/GNU C Compiler
-./USART.o: .././USART.cpp
+./SSD1306_Driver.o: .././SSD1306_Driver.cpp
 	@echo Building file: $<
 	@echo Invoking: AVR8/GNU C Compiler : 5.4.0
-	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-g++.exe$(QUOTE) -funsigned-char -funsigned-bitfields -DNDEBUG  -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\include" -I"../../../../include"  -Os -ffunction-sections -fdata-sections -fpack-struct -fshort-enums -Wall -mmcu=atmega16 -B "C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\gcc\dev\atmega16" -c -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
+	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-g++.exe$(QUOTE) -funsigned-char -funsigned-bitfields -DDEBUG  -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\include" -I"../../../../include"  -Og -ffunction-sections -fdata-sections -fpack-struct -fshort-enums -g2 -Wall -mmcu=atmega16 -B "C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\gcc\dev\atmega16" -c -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
 	@echo Finished building: $<
 	
 
@@ -118,5 +118,5 @@ $(OUTPUT_FILE_PATH): $(OBJS) $(USER_OBJS) $(OUTPUT_FILE_DEP)
 clean:
 	-$(RM) $(OBJS_AS_ARGS) $(EXECUTABLES)  
 	-$(RM) $(C_DEPS_AS_ARGS)   
-	rm -rf "libUSART.elf" "libUSART.a" "libUSART.hex" "libUSART.lss" "libUSART.eep" "libUSART.map" "libUSART.srec" "libUSART.usersignatures"
+	rm -rf "libSSD1306_Driver.elf" "libSSD1306_Driver.a" "libSSD1306_Driver.hex" "libSSD1306_Driver.lss" "libSSD1306_Driver.eep" "libSSD1306_Driver.map" "libSSD1306_Driver.srec" "libSSD1306_Driver.usersignatures"
 	
