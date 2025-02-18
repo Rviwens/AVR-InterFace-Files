@@ -38,7 +38,7 @@ int main(void)
 
 	USART_Send("\r\nHello Void. I have awoken\r\n Response | ");
 
-	RTC_Clock_Write(4,50,30,1);
+	//RTC_Clock_Write(4,50,30,1);
 
 	while (1)
 	{

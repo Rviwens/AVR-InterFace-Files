@@ -13,8 +13,6 @@ typedef struct{
 	char *type;
 } File;
 
-char DataBuff[511];
-
 //prototypes
 /*
 * Reads the FAT32 MBR for allocation info
