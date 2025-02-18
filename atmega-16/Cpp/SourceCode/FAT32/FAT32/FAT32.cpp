@@ -2,6 +2,8 @@
 #include "FAT32.h"
 //************************************************************//
 // For reading and writing files in FAT32
+FAT32_File::FAT32_File(){}
+
 FAT32_File::FAT32_File(char *FileName, char *Filetype){
 	Fname=FileName;
 	type=Filetype;

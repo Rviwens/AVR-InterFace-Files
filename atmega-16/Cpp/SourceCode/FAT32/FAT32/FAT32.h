@@ -22,7 +22,7 @@
 class FAT32_File{
 //************************************************************//
 	public:
-	uint8_t DataBuff[511];
+	uint8_t DataBuff[512];
 	//default constructor
 	FAT32_File();
 
