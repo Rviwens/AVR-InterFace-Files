@@ -1,4 +1,9 @@
-#define F_CPU 20000000UL	// Define CPU frequency here 20MHZ
+#ifndef _RTC_
+#define _RTC_
+
+#ifndef F_CPU
+#define #define F_CPU 20000000UL
+#endif
 
 #include <avr/io.h>
 #include <util/delay.h>
@@ -44,3 +49,4 @@ private:
 uint8_t second,minute,hour,day,date,month,year;
 I2C i2c;
 };
+#endif
