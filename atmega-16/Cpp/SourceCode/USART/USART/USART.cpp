@@ -1,9 +1,11 @@
 
 #include "USART.h"
 
-USART::USART(void){}
+USART::USART(void){ RXSBWP = 0;}
+	
 USART::USART(int parity, int bitsize, long baud){
-Init(parity,bitsize,baud);	
+  RXSBWP = 0;	
+	Init(parity,bitsize,baud);	
 }	
 
 	
@@ -42,7 +44,6 @@ void USART::Init(int parity, int bitsize, long baud)
 	UBRRH = (BDC >> 8);	/* Load upper 8-bits*/
 }
 
-void USART::T(){if(BAUD<=9000){_delay_ms(1);}if(BAUD<=5000){_delay_ms(9);}if(BAUD<=1200){_delay_ms(50);}}
 
 
 void USART::TxChar(char ch){
@@ -50,78 +51,107 @@ void USART::TxChar(char ch){
 	UDR=ch;
 }
  
-void USART::Send(char*str){
-	for(int i=0;str[i]!='\0'; i++){
+void USART::Send(char str[]){
+	for(int i=0;str[i]!='\0'; i++)
 		TxChar(str[i]);
-		T();
-	}
+
 }
-void USART::Send(const char*str){
-	for(int i=0;str[i]!='\0'; i++){
+void USART::Send(const char str[]){
+	for(int i=0;str[i]!='\0'; i++)
 		TxChar(str[i]);
-		T();
-}
+
 }
 
-void USART::Send_ESS(char *str,short ES){
-	for(uint8_t i=0;i<strlen(str); i++){
-		TxChar(str[i]);
-		T();
+void USART::Send( uint8_t str[]){
+	for(int i=0;str[i]!='\0'; i++)
+	TxChar(str[i]);
+
+}
+
+	void USART::print_P(PGM_P p)
+	{
+		char c;
+		while ((c = pgm_read_byte(p++)) != 0)
+		{
+			TxChar(c);      // or whatever your transmit function is called
+		}
 	}
+
+
+
+void USART::Send_ESS(char *str,short ES){
+	for(uint8_t i=0;i<strlen(str); i++)
+		TxChar(str[i]);
+
+
 	if (ES==1){
-		TxChar(' ');T();
-		TxChar('|');T();
-		TxChar('E');T();
+		TxChar(' ');
+		TxChar('|');
+		TxChar('E');
 	}
 }
 void USART::Send_ESS(const char *str,short ES){
 const char *out =str;
-	Send_ESS(out,ES);
+	Send_ESS((char*)out,ES);
 }
 
 
 
 void USART::Int_Str(int I,short ES){
+	static char NUM_Hold[8];
+	memset(NUM_Hold,0,8);
 	itoa(I,NUM_Hold,10);
 	Send_ESS(NUM_Hold,ES);
 }
-void USART::Int_Str(uint8_t I,short ES){
-Int_Str(I,ES);
+void USART::Int_Str(uint8_t I, short ES){
+	Int_Str((int)I, ES);
 }
 void USART::Int_StrBIN(int I, short ES){
+	static char NUM_Hold[8];
+	memset(NUM_Hold,0,8);
 	itoa(I,NUM_Hold,2);
 	Send_ESS(NUM_Hold,ES);
 }
 void USART::Int_StrHEX(int I, short ES){
+	static char NUM_Hold[8];
+	memset(NUM_Hold,0,8);
 	Send("0x");
 	itoa(I,NUM_Hold,16);
 	Send_ESS(NUM_Hold,ES);
 }
 
 void USART::Int_StrHEXRAW(int I, short ES){
+	static char NUM_Hold[8];
+	memset(NUM_Hold,0,8);
 	itoa(I,NUM_Hold,16);
 	if (I ==0 || I<=0xF) Send_ESS("0",0);
 	Send_ESS(NUM_Hold,ES);
-
 }
 
-void USART::Long_Str(long I, short ES){
+void USART::Long_Str(uint32_t I, short ES){
+	static char NUM_Hold[16];
+	memset(NUM_Hold,0,16);
 	ltoa(I,NUM_Hold,10);
 	Send_ESS(NUM_Hold,ES);
 }
-void USART::Long_StrHEX(long I, short ES){
+void USART::Long_StrHEX(uint32_t  I, short ES){
+	static char NUM_Hold[11];
+	memset(NUM_Hold,0,11);
 	ltoa(I,NUM_Hold,16);
 	Send_ESS(NUM_Hold,ES);
 }
-void USART::Long_StrBIN(long I, short ES){
+void USART::Long_StrBIN(uint32_t I , short ES){
+	static char NUM_Hold[11];
+	memset(NUM_Hold,0,8);
 	ltoa(I,NUM_Hold,2);
 	Send_ESS(NUM_Hold,ES);
 }
+
 void USART::Dtoa(double d, short ES){
-char buff[10];
-String s1;
-s1.dtoa(d,buff);
-Send(buff);
+	static char buff[11];
+	String s1;
+	s1.dtoa(d,buff);
+	Send(buff);
 }
 
 
@@ -151,3 +181,8 @@ void USART::CheckRx(){
 			UBRRH=0x00;
 		}
 
+
+USART::~USART()
+{
+	END();
+}
