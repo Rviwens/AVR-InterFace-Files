@@ -1,18 +1,37 @@
 //************************************************************//
 #include "FAT32.h"
+
+
+
+
 //************************************************************//
 // For reading and writing files in FAT32
-FAT32_File::FAT32_File(){}
+FAT32_File::FAT32_File():usart(0){}
+//************************************************************//
+FAT32_File::FAT32_File(const char *FileName, const char *Filetype):
+usart(0){
+	Fname=(char*)FileName;
+	type=(char*)Filetype;
+}
 
-FAT32_File::FAT32_File(char *FileName, char *Filetype){
+//************************************************************//
+FAT32_File::FAT32_File(USART usart_inst):
+usart(&usart_inst){}
+
+FAT32_File::FAT32_File(char *FileName, char *Filetype,USART usart_inst):
+	usart(&usart_inst)
+{
 	Fname=FileName;
 	type=Filetype;
 }
 //************************************************************//
-FAT32_File::FAT32_File(const char *FileName, const char *Filetype){
+FAT32_File::FAT32_File(const char *FileName, const char *Filetype,USART usart_inst):
+usart(&usart_inst){
 	Fname=(char*)FileName;
 	type=(char*)Filetype;
 }
+
+
 //************************************************************//
 char* FAT32_File::getFname(){return Fname;}
 char* FAT32_File::getType(){return type;}
@@ -47,16 +66,16 @@ uint8_t FAT32_File::Open(){
 	uint32_t loci;
 	for (uint16_t i=0; i<SecsPerClust; i++){
 		card.RSB(DataBuff,RootDirSec+i);
+			
 		for(uint16_t x=0; x<= 479; x++){
 			flag=1;
-
+			
 			if(DataBuff[x]==Fname[0]){
 				for(uint8_t y=0; y <strlen(Fname); y++)
 				if (DataBuff[x+y]!=Fname[0+y])flag=0;
 				if(flag!=0){
 					locX=x;
 					loci=i;
-					//USART_Send("\r\n Found");
 					flag =2;
 					break;
 				}if(flag==2)break;
@@ -75,35 +94,46 @@ uint8_t FAT32_File::Open(){
 	return 1;
 }
 //************************************************************//
+
 void FAT32_File::Check(){
-	if(Open()==0)usart.Send("\r\nFile Found");else usart.Send("\r\nFile not Found");
+	if(Open()==0) usart->print_P(PSTR("\r\nFile Found"));else usart->print_P(PSTR("\r\nFile not Found"));
 }
 
 void FAT32_File::Report(){
-	usart.Send("\r\n Secs Per Clust = ");
-	usart.Long_Str(SecsPerClust,0);
-	usart.Send("\r\n FAT Start Sec = ");
-	usart.Long_Str(FATStartSec,0);
-	usart.Send("\r\n FATSecs = ");
-	usart.Long_Str(FatSecs,0);
-	usart.Send("\r\n RootDir = ");
-	usart.Long_Str(RootDirSec,0);
-	usart.Send("\r\n Bytes Per Sec = ");
-	usart.Long_Str(BytesPerSec,0);
-	usart.Send("\r\n");
+	
+	usart->print_P( PSTR("\r\n Secs Per Clust = "));
+	usart->Long_Str(SecsPerClust,0);
+
+	usart->print_P(PSTR("\r\n FAT Start Sec = "));
+	usart->Long_Str(FATStartSec,0);
+
+	usart->print_P(PSTR("\r\n FATSecs = "));
+	usart->Long_Str(FatSecs,0);
+
+	usart->print_P(PSTR("\r\n RootDir = "));
+	usart->Long_Str(RootDirSec,0);
+
+	usart->print_P(PSTR("\r\n Secs Per Clust = "));
+	usart->Long_Str(BytesPerSec,0);
+
+	usart->Send("\r\n");
 	Check();
-	usart.Send("\r\n Name of File is: ");
-	usart.Send(Fname);
-	usart.Send(" | Type of File is: ");
-	usart.Send(type);
-	usart.Send(" | FCA: ");
-	usart.Long_Str(FirstClustAddr,0);
-	usart.Send(" | FLIRD: ");
-	usart.Long_Str(FILELocationInRootDir,0);
-	usart.Send("\r\n");
+
+	usart->print_P( PSTR("\r\n Name of File is: "));
+	usart->Send(Fname);      // ensure null-terminated
+	usart->print_P(PSTR(" | Type of File is: "));
+	usart->Send(type);       // ensure null-terminated
+	usart->print_P(PSTR(" | FCA: "));
+	usart->Long_Str(FirstClustAddr,0);
+	usart->print_P(PSTR(" | FLIRD: "));
+	usart->Long_Str(FILELocationInRootDir,0);
+	usart->Send("\r\n");
 }
+
+
+
 //************************************************************//
-uint8_t FAT32_File::Read(){
+uint8_t FAT32_File::Read(uint8_t format){
 	
 	if(Open() ==0){
 
@@ -114,20 +144,21 @@ uint8_t FAT32_File::Read(){
 
 		while(1){
 			long ConstMin = 512*(int)(CurrentClust/128);
-			long loc = RootDirSec+(32*(CurrentClust-2));
+			long loc = RootDirSec+(SecsPerClust*(CurrentClust-2));
 			char c=-1;
 			uint32_t AddrData;
 			
 			while(++c<SecsPerClust){
 				
 				
-				usart.Send("\r\n Sector: ");
-				usart.Int_Str(c,0);
-				usart.Send("\r\n");
-				
 				card.RSB(DataBuff,loc+c);
-				for(short i =0; i < 512;i++)
-				usart.Int_StrHEXRAW(DataBuff[i],0);
+				for(short i =0; i < 512;i++){
+					if(format==0)
+						usart->Int_StrHEXRAW(DataBuff[i],0);
+					else if ( format ==1)
+						usart->Send((char*)DataBuff[i]);
+						
+				}
 			}
 
 			card.RSB(DataBuff,FATStartSec+((int)CurrentClust/128));
@@ -147,6 +178,13 @@ uint8_t FAT32_File::Read(){
 	return 1;
 }
 //************************************************************//
+
+void FAT32_File::Print_DataBuffer(){
+	for(short i =0; i < 512;i++)
+	usart->Int_StrHEXRAW((int)DataBuff[i],0);
+}
+
+//************************************************************//
 void FAT32_File::ClearClust(uint32_t ClustAddr){
 	memset(DataBuff,0,512);
 	char c=-1;
@@ -162,7 +200,7 @@ uint8_t FAT32_File::Delete_Contents(void){
 		uint32_t CurrentClust = FirstClustAddr;	//
 		uint32_t AddrData=0;
 		while(FirstClustAddr!=0){
-			long loc = RootDirSec+(32*(CurrentClust-2));
+			long loc = RootDirSec+(SecsPerClust*(CurrentClust-2));
 			long ConstMin = 512*(int)(CurrentClust/128);
 
 			ClearClust(loc);
@@ -180,11 +218,6 @@ uint8_t FAT32_File::Delete_Contents(void){
 			CurrentClust =  (AddrData&FATEntryMask);
 
 			if(AddrData>= SectorEndingTag||AddrData== 0x0)break;
-			
-			
-			
-			//	USART_Send("\r\n Clearing Cluster:");
-			//	USART_Long_Str(CurrentClust,0);
 			
 			
 		}
@@ -529,10 +562,6 @@ uint8_t FAT32_File::RSIC(long Clust,uint8_t Sect){
 			if(TempCount<Clust){memset(DataBuff,0xFF,512); return 2;}// Cluster Dose not exist
 			
 			card.RSB(DataBuff,(RootDirSec+(32*(CurrentClust-2))+Sect));
-			// 			USART_Send("\r\n Cluster Addr |||=  ");
-			// 			USART_Long_StrHEX(CurrentClust,0);
-			// 			USART_Send("\r\n TempCount |||=  ");
-			// 			USART_Long_StrHEX(TempCount,0);
 			return 0; // Complete With No errors
 			
 		}
@@ -583,4 +612,3 @@ uint8_t FAT32_File::WSIC(long Clust,uint8_t Sect){
 	//returned 1 - Outside Cluster Size (Over Sectors Per Clust)
 return 0;
 }
-//************************************************************//

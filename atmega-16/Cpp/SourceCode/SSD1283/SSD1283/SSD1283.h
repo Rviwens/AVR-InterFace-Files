@@ -4,10 +4,9 @@
 
 #include <math.h>
 #include <SPI.h>
-#include <USART.h>
 #include <MicroSD.h>
 #include <FAT32.h>
-#include <SourceCode/Shape/Shape/Shape.h>
+#include <Shape/Shape/Shape.h>
 #define SSD1283_HEIGHT 132
 #define SSD1283_WIDTH 132
 
@@ -46,7 +45,10 @@ class SSD1283 {
 public:
 
 SSD1283(void);
+
 SSD1283(uint8_t cs, uint8_t cd,uint8_t rot);
+
+SSD1283(uint8_t cs, uint8_t cd,uint8_t rot,USART usart_inst);
 
 void SetPins(uint8_t cs, uint8_t cd);
 
@@ -126,17 +128,21 @@ void Display();
 
 FAT32_File screen;
 
+
+bool fillRect(int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint16_t color);
+
 protected:
 SPI spi;
-USART usart;
+USART* usart;
+
 
 private:	
-bool fillRect(int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint16_t color);
 void startTransfer();
 void endTransfer();
 void CD_EN();
 void CD_DE();
 void GenerateFile();
+
 uint8_t _cd,_cs,_rot;
 MicroSD_Card card;
 

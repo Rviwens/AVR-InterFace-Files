@@ -7,18 +7,15 @@
 
 #include "SSD1283.h"
 /***********************************************************************/
-SSD1283::SSD1283(){
+SSD1283::SSD1283():
+usart(0)
+{
 	screen.setFname((char*)"scrn");
 	screen.setType((char*)"txt");
-
-usart.Send("\r\n Status = ");
-int status = card.Init();
-usart.Int_Str(status,0);
-
-	//GenerateFile();
 };
 	
-SSD1283::SSD1283(uint8_t cs, uint8_t cd,uint8_t rot)
+SSD1283::SSD1283(uint8_t cs, uint8_t cd,uint8_t rot):
+usart(0)
 {
 	screen.setFname((char*)"scrn");
 	screen.setType((char*)"txt");
@@ -29,12 +26,29 @@ SSD1283::SSD1283(uint8_t cs, uint8_t cd,uint8_t rot)
 	DDRB|=(1<<cd)|(1<<cs)|(1<<5)|(1<<7);
 	PORTB|=(1<<cd)|(1<<cs);
 
-usart.Send("\r\n Status = ");
-int status = card.Init();
-usart.Int_Str(status,0);
+	//GenerateFile();
+}
+
+SSD1283::SSD1283(uint8_t cs, uint8_t cd,uint8_t rot, USART usart_inst):
+usart(&usart_inst)
+{
+	screen.setFname((char*)"scrn");
+	screen.setType((char*)"txt");
+	
+	this->_cs = cs;
+	this->_cd = cd;
+	this->_rot=rot;
+	DDRB|=(1<<cd)|(1<<cs)|(1<<5)|(1<<7);
+	PORTB|=(1<<cd)|(1<<cs);
+
+	usart->print_P( PSTR("\r\n Status = "));
+	char status = card.Init();
+	usart->Int_Str(status,0);
 
 	//GenerateFile();
 }
+
+
 
 void SSD1283::SetPins(uint8_t cs, uint8_t cd){
 	this->_cs = cs;
@@ -69,7 +83,7 @@ void SSD1283::set_cd(uint8_t pin){
 
 /***********************************************************************/
 void SSD1283::setRotation(uint8_t rot){
-	this->_rot=_rot;
+	this->_rot= rot;
 }
 /***********************************************************************/
 void SSD1283::Command(uint8_t cmd){
@@ -358,7 +372,7 @@ bool SSD1283::fillRect(int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint16_t 
 	if((x1<0)||(x2<0)||(y1<0)||(y2<0)){
 		return false;
 	}
-	if((x1>SSD1283_WIDTH)||(x2>SSD1283_WIDTH)||(y1>SSD1283_HEIGHT)||(y2>SSD1283_WIDTH)){
+	if((x1>SSD1283_WIDTH)||(x2>SSD1283_WIDTH)||(y1>SSD1283_HEIGHT)||(y2>SSD1283_HEIGHT)){
 		return false;
 	}
 	

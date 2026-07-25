@@ -10,10 +10,10 @@
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
-#include <USART.h>
+#include <avr/pgmspace.h>
 #include <SPI.h>
 #include <MicroSD.h>
-
+#include <USART.h>
 #define ReseveClust  500
 #define SectorEndingTag 0x0FFFFFFF
 #define FATEntryMask    0xFFFFFFFF
@@ -21,13 +21,21 @@
 //************************************************************//
 class FAT32_File{
 //************************************************************//
+
 	public:
 	uint8_t DataBuff[512];
+
 	//default constructor
 	FAT32_File();
-
-	FAT32_File(char *Fname, char *type);
 	FAT32_File(const char *Fname, const char *type);
+	
+	
+	
+	FAT32_File(USART usart_inst);
+	FAT32_File(char *Fname, char *type,USART usart_inst);
+	FAT32_File(const char *Fname, const char *type,USART usart_inst);
+
+	
 	//Accessors & modifiers  
 	char* getFname();
 	char* getType();
@@ -46,6 +54,7 @@ class FAT32_File{
 	* @return 2 - File not Found
 	*/
 	uint8_t Open();
+
 	/*
 	* Checks if the File exists
 	* @param file - A File to be opened (typedef)
@@ -61,7 +70,12 @@ class FAT32_File{
 	* @param file - A File to be opened (typedef)
 	* @return 0 - No error, file found
 	* @return 2 - File not Found
-	*/uint8_t Read();
+	*/
+	uint8_t Read(uint8_t format);
+	/*
+	* Prints the contents of the data buffer to USART
+	*/
+	void Print_DataBuffer();
 	/*
 	* Deletes a file from the FAT
 	* @param file - A File to be opened (typedef)
@@ -69,6 +83,13 @@ class FAT32_File{
 	* @return 2 - File not Found
 	*/
 	void Delete();
+	/*
+	* Deletes the contents of a File
+	* @param file - A File to be opened (typedef)
+	* @return 0 - No error, file found
+	* @return 2 - File not Found
+	*/
+	uint8_t Delete_Contents();
 	/*
 	* Appends a new cluster to a file
 	* @param file - A File to be opened (typedef)
@@ -125,24 +146,21 @@ class FAT32_File{
 	//************************************************************//
 	private:
 	// Private members
-	uint32_t RootDirSec, FATStartSec, FatSecs,LBA,SecsPerClust,BytesPerSec, FSInfo, FILELocationInRootDir, FirstClustAddr;
+	uint32_t RootDirSec, FATStartSec, FatSecs,LBA,SecsPerClust,BytesPerSec, FSInfo, FILELocationInRootDir, FirstClustAddr =0;
 	char *Fname;
-	char *type;
+	char *type;	
+	
 	MicroSD_Card card;
-	USART usart; 
+
+	USART* usart;
+
+	
 	//Private prototypes
 	/*
 	* Clears the contents in a cluster
 	* @param ClustAddr - The address of the cluster
 	*/
 	void ClearClust(uint32_t ClustAddr);
-	/*
-	* Deletes the contents of a File
-	* @param file - A File to be opened (typedef)
-	* @return 0 - No error, file found
-	* @return 2 - File not Found
-	*/
-	uint8_t Delete_Contents();
 	/*
 	* Clears a files entry in the FAT
 	* @param file - A File to be opened (typedef)
