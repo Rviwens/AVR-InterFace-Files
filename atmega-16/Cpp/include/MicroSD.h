@@ -35,7 +35,6 @@ public:
 
 MicroSD_Card();
 
-
 /*
 * Initializes the SD card
 * @return 0 - Card failed to go idle
@@ -59,6 +58,7 @@ uint8_t RSB( uint8_t*buf,uint32_t addr);
 * @param addr- Address to read
 */
 void WSB(uint8_t *buf,uint32_t addr);
+
 private:
 SPI spi;
 /*

@@ -12,6 +12,7 @@
 #include <avr/interrupt.h>
 #include <math.h>
 #include <string.h>
+#include <avr/pgmspace.h>
 #include <StringFunctions.h>
 
 
@@ -42,10 +43,13 @@ class USART{
 	void TxChar(char str);
 	/*
 	* Sends a String of data(chars) through USART
-	* @param str - Pointer to string being sent
+	* @param str -  string being sent
 	*/
-	void Send(char*str);
-	void Send(const char*str);
+	void Send(char str[]);
+	void Send(const char str[]);
+	void Send(uint8_t cstr[]);
+	void print_P(PGM_P p);
+
 	/*
 	* Sends a String of data(chars) through USART with an optional ending tag
 	* @param str - Pointer to string being sent
@@ -83,19 +87,19 @@ class USART{
 	* @param I - integer being sent
 	* @param ES - if set, a ending tag will be sent (" |E")
 	*/
-	void Long_Str(long I, short ES);
+	void Long_Str(uint32_t I, short ES);
 	/*
 	* Sends a long integer in hexadecimal through USART
 	* @param I - integer being sent
 	* @param ES - if set, a ending tag will be sent (" |E")
 	*/
-	void Long_StrHEX(long I,short ES);
+	void Long_StrHEX(uint32_t  I,short ES);
 	/*
 	* Sends a long integer in binary through USART
 	* @param I - integer being sent
 	* @param ES - if set, a ending tag will be sent (" |E")
 	*/
-	void Long_StrBIN(long I, short ES);
+	void Long_StrBIN(uint32_t I, short ES);
 	void Dtoa(double d, short ES);
 	/*
 	* Checks if RX buffer has data
@@ -105,17 +109,14 @@ class USART{
 	* Ends USART
 	*/
 	void END();
+	~USART();
 
 	private:
-	long BAUD;
-	char NUM_Hold[20];
+	long BAUD;                                   
 	unsigned char RxSerialBuffer[Buffer_Size];
 	int RXSBWP;
 	unsigned char RXSB[Buffer_Size];
-	/*
-	* Sets a delay time a known baud rate
-	*/
-	void T();
+
 
 };
 
